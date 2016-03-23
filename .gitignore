@@ -20,9 +20,6 @@ coverage
 # node-waf configuration
 .lock-wscript
 
-# Compiled binary addons (http://nodejs.org/api/addons.html)
-build/Release
-
 # Dependency directory
 node_modules
 
@@ -31,4 +28,9 @@ node_modules
 
 # Optional REPL history
 .node_repl_history
+
+# Local env variables
 .env
+
+# Directory containing transcompiled version of es6 code
+build
