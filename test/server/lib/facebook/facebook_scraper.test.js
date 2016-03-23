@@ -1,14 +1,14 @@
-import { assert } from "chai";
-import * as sinon from "sinon";
-import graph from "fbgraph";
+import { assert } from 'chai';
+import * as sinon from 'sinon';
+import graph from 'fbgraph';
 
-import FacebookScraper from "../../../../server/lib/facebook/facebook_scraper.js";
+import FacebookScraper from '../../../../server/lib/facebook/facebook_scraper.js';
 
 describe('FacebookScraper', () => {
   let sandbox;
   let scraper;
-  let fakeAccount = 'manchesterunited';
-  let fakeToken = 'my_token'
+  const fakeAccount = 'manchesterunited';
+  const fakeToken = 'my_token';
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -25,5 +25,5 @@ describe('FacebookScraper', () => {
 
   it('has the `getFeed` method defined', () => {
     assert.isFunction(scraper.getFeed);
-  })
+  });
 });

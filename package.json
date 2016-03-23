@@ -16,6 +16,9 @@
   "devDependencies": {
     "babel-register": "^6.7.2",
     "chai": "^3.5.0",
+    "eslint": "^2.4.0",
+    "eslint-config-airbnb": "^6.1.0",
+    "eslint-plugin-react": "^4.2.3",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3"
   },
@@ -25,7 +28,8 @@
     "build": "babel ./server -d ./build --source-maps --copy-files",
     "start": "node ./build/scheduler.js",
     "test": "NODE_ENV=test mocha --compilers js:babel-register --reporter spec 'test/**/*.test.js'",
-    "test-debug": "NODE_ENV=test mocha debug --compilers js:babel-register --reporter spec 'test/**/*.test.js'"
+    "test-debug": "NODE_ENV=test mocha debug --compilers js:babel-register --reporter spec 'test/**/*.test.js'",
+    "lint": "eslint ./server ./test"
   },
   "repository": {
     "type": "git",

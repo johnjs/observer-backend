@@ -1,8 +1,8 @@
-import { assert } from "chai";
-import * as sinon from "sinon";
-import config from "../../server/config/test.json";
-import * as FacebookRunner from "../../server/lib/facebook/facebook_scraper_runner.js";
-import scheduleJobs from "../../server/scheduler.js";
+import { assert } from 'chai';
+import * as sinon from 'sinon';
+import config from '../../server/config/test.json';
+import * as FacebookRunner from '../../server/lib/facebook/facebook_scraper_runner.js';
+import scheduleJobs from '../../server/scheduler.js';
 
 describe('scheduler', () => {
   let sandbox;
@@ -18,7 +18,7 @@ describe('scheduler', () => {
   describe('scheduleJobs', () => {
     let runFacebookStub;
     let clock;
-    let scrapingIntervalInSec = config.SCRAPING_INTERVAL;
+    const scrapingIntervalInSec = config.SCRAPING_INTERVAL;
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
@@ -26,7 +26,7 @@ describe('scheduler', () => {
     });
 
     it('it runs FacebookRunner in the interval defined in the config file', () => {
-      let scrapingIntervalInMiliSec = scrapingIntervalInSec * 1000;
+      const scrapingIntervalInMiliSec = scrapingIntervalInSec * 1000;
 
       scheduleJobs();
 

@@ -1,15 +1,16 @@
 /**
-* The module runs workers scraping Facebook data.
-*/
+ * The module runs workers scraping Facebook data.
+ */
 
-
-import child_process from "child_process";
-import config from "../../config/config";
+import { default as childProcess } from 'child_process';
+import config from '../../config/config';
 
 function run() {
-    let child = child_process.fork(__dirname + '/facebook_scraper', [config.FACEBOOK_ACCOUNT, config.FACEBOOK_TOKEN], {
-      silent: true
-    });
+  const args = [config.FACEBOOK_ACCOUNT, config.FACEBOOK_TOKEN];
+  const pathToScraper = `${__dirname} + '/facebook_scraper`;
+  childProcess.fork(pathToScraper, args, {
+    silent: true,
+  });
 }
 
 export { run };
