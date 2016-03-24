@@ -7,9 +7,9 @@ import config from '../../config/config';
 
 function run() {
   const args = [config.FACEBOOK_ACCOUNT, config.FACEBOOK_TOKEN];
-  const pathToScraper = `${__dirname} + '/facebook_scraper`;
+  const pathToScraper = `${__dirname}/facebook_scraper`;
   childProcess.fork(pathToScraper, args, {
-    silent: true,
+    silent: false,
   });
 }
 

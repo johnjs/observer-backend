@@ -8,5 +8,6 @@ config.FACEBOOK_ACCOUNT = process.env.FACEBOOK_ACCOUNT || config.FACEBOOK_ACCOUN
 config.FACEBOOK_TOKEN = process.env.FACEBOOK_TOKEN || config.FACEBOOK_TOKEN;
 config.FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || config.FACEBOOK_APP_ID;
 config.FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || config.FACEBOOK_APP_SECRET;
+config.FEED_DESTINATION = process.env.FEED_DESTINATION || config.FEED_DESTINATION;
 
 export default config;
