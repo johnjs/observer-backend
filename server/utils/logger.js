@@ -38,8 +38,8 @@ class Logger {
     this.wlogger.setLevels(levels);
   }
 
-  logError(message) {
-    this.wlogger.error('[%s] %s', moment().format(), message);
+  logError(err) {
+    this.wlogger.error('[%s] %s %s', moment().format(), err.message, err.stack);
   }
 }
 
