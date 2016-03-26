@@ -18,7 +18,7 @@ const consoleLogConf = new(winston.transports.Console)({
   colorize: true,
 });
 
-const fileLogConf = new(WinstonDailyRotateFile)({
+const fileLogConf = new(WinstonDailyRotateFile)({ // eslint-disable-line no-unused-vars
   filename: '../../logs/observer.log',
   datePattern: '.dd-MM-yyyy',
 });

@@ -6,6 +6,7 @@
  */
 import { extend } from 'underscore';
 import jsonfile from 'jsonfile';
+import config from '../../config/config';
 import logger from '../../utils/logger.js';
 import Q from 'q';
 import moment from 'moment';
@@ -13,11 +14,14 @@ import FeedStream from './feed_stream';
 
 const FEED_DIRECTORY = './feed/facebook/';
 const FEED_FILE_FORMATTING_OPTIONS = { spaces: 2 };
-const DEFAULT_FEED_REQUEST_OPTIONS = {
-  // fields: 'likes.summary(true)',
-  since: moment().subtract({ h: 24 }).toISOString(),
-  limit: 2,
-};
+
+function getDefaultRequestParams() {
+  return {
+    // fields: 'likes.summary(true)',
+    since: moment().subtract({ h: 24 }).toISOString(),
+    limit: 100,
+  };
+}
 
 export default class FacebookScraper {
 
@@ -27,11 +31,8 @@ export default class FacebookScraper {
   }
 
   scrape() {
-    const reqParams = extend({ access_token: this.token }, DEFAULT_FEED_REQUEST_OPTIONS);
-    const reqParamsStr = Object.keys(reqParams).reduce(
-      (p, k) => p.concat(`${k}=${reqParams[k]}`), []).join('&');
-    const url = `${this.account}/feed?${reqParamsStr}`;
-    const stream = new FeedStream();
+    const url = this._buildRequestUrl();
+    const stream = this._getDataStream();
     const data = [];
 
     stream.on('error', err => logger.logError(err));
@@ -41,17 +42,29 @@ export default class FacebookScraper {
     stream.callGraphAPI(url);
   }
 
+  _getDataStream() {
+    return new FeedStream();
+  }
+
+  _buildRequestUrl() {
+    const reqParams = extend({ access_token: this.token }, getDefaultRequestParams());
+    const reqParamsStr = Object.keys(reqParams).reduce(
+      (p, k) => p.concat(`${k}=${reqParams[k]}`), []).join('&');
+    return `${this.account}/feed?${reqParamsStr}`;
+  }
+
   _saveFeed(feed) {
-    if (process.env.FEED_DESTINATION === 'FILE') {
+    if (config.FEED_DESTINATION === 'FILE') {
       this._saveFeedInFile(feed);
     }
   }
 
   _saveFeedInFile(feed) {
     const fileName = `${FEED_DIRECTORY}${this.account}_${(new Date()).toISOString()}.json`;
-    Q.denodeify(jsonfile.writeFile)(fileName, feed, FEED_FILE_FORMATTING_OPTIONS).catch((e) => {
-      logger.logError(e);
-    });
+    return Q.denodeify(jsonfile.writeFile)(fileName, feed, FEED_FILE_FORMATTING_OPTIONS)
+      .catch((e) => {
+        logger.logError(e);
+      });
   }
 }
 
