@@ -11,17 +11,16 @@ export default class FeedStream extends PassThrough {
     });
   }
 
-  callGraphAPI(address) {
-    const self = this;
-    Q.denodeify(graph.get)(address).then(res => {
-      self.write(res.data);
+  callGraphAPI(url) {
+    Q.denodeify(graph.get)(url).then(res => {
+      this.write(res.data);
       if (res.paging && res.paging.next) {
-        self.callGraphAPI(res.paging.next);
+        this.callGraphAPI(res.paging.next);
       } else {
-        self.end();
+        this.end();
       }
     }).catch((err) => {
-      self.emit('error', err);
+      this.emit('error', err);
     });
   }
 }
