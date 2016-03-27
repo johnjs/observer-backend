@@ -60,7 +60,7 @@ describe('FacebookScraper', () => {
 
       assert.equal(scraper._saveFeed.callCount, 0);
 
-      fakeStream.emit('end');
+      fakeStream.emit('finish');
 
       assert.isOk(scraper._saveFeed.calledOnce);
       assert.isOk(scraper._saveFeed.calledWith(expectedSavedResult));
