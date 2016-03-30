@@ -19,9 +19,15 @@ import FeedStream from './feed_stream';
 const FEED_DIRECTORY = './feed/facebook/';
 const FEED_FILE_FORMATTING_OPTIONS = { spaces: 2 };
 
+/**
+* Returns default parameters of Facebook API call. Since we are not interested
+* in actual authors of comments and likes of a given post but only in the `total_count`
+* number (which is provided in `summary`), both `comments` and 'likes' fields are limited to 0.
+*/
 function getDefaultRequestParams() {
   return {
-    // fields: 'likes.summary(true)',
+    fields: ['message', 'created_time', 'comments.limit(0).summary(true)',
+            'likes.limit(0).summary(true)', 'link', 'message_tags'].join(','),
     since: moment().subtract({ h: 24 }).toISOString(),
     limit: 100,
   };

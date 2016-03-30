@@ -78,6 +78,8 @@ describe('FacebookScraper', () => {
   describe('_buildRequestUrl', () => {
     const currentTime = '2016-03-26T05:50:25.300Z';
     const expectedSinceParam = '2016-03-25T05:50:25.300Z';
+    const expectedFielsParam = ['message', 'created_time', 'comments.limit(0).summary(true)',
+            'likes.limit(0).summary(true)', 'link', 'message_tags'].join(',');
 
     beforeEach(() => {
       sandbox.useFakeTimers(new Date(currentTime).valueOf());
@@ -87,6 +89,7 @@ describe('FacebookScraper', () => {
       const expectedUrl = [
         `${fakeAccount}/feed?`,
         `access_token=${fakeToken}`,
+        `&fields=${expectedFielsParam}`,
         `&since=${expectedSinceParam}&limit=100`,
       ].join('');
       const actualUrl = scraper._buildRequestUrl();
