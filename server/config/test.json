@@ -1,3 +1,5 @@
 {
-    "SCRAPING_INTERVAL": 10
+    "MONGODB_DATABASE": "observer_backend",
+    "SCHEDULER_POLLING_INTERVAL": 10,
+    "SCRAPING_INTERVAL": 1
 }

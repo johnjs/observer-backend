@@ -1,4 +1,6 @@
 {
-  "FACEBOOK_TOKEN": "fake_token",
-  "FACEBOOK_ACCOUNT": "me"
+  "MONGODB_DATABASE": "observer_backend",
+  "MONGODB_PORT": "27017",
+  "MONGODB_HOST": "localhost",
+  "MONGODB_USER": "observer_backend"
 }
