@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import FeedStream from '../../../../server/lib/facebook/feed_stream';
 import fbgraph from '../../../../server/lib/facebook/fbgraph.js';
 
-describe('FeedStream', () => {
+describe('feed_stream', () => {
   let stream;
 
   beforeEach(() => {
@@ -74,6 +74,19 @@ describe('FeedStream', () => {
         });
 
         stream.callGraphAPI(url);
+      });
+    });
+
+    describe('when the API returns an error', () => {
+      it('emits the error', (done) => {
+        const expectedError = new Error('There`s no feed! I`m hungry!');
+        fbgraph.get.yieldsAsync(expectedError);
+
+        stream.on('error', (actualError) => {
+          assert.deepEqual(actualError, expectedError);
+          done();
+        });
+        stream.callGraphAPI();
       });
     });
   });

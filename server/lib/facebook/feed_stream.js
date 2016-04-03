@@ -1,3 +1,7 @@
+/**
+ * Module streas facebook feed
+ **/
+
 import { PassThrough } from 'stream';
 import graph from './fbgraph';
 import Q from 'q';
@@ -11,6 +15,12 @@ export default class FeedStream extends PassThrough {
     });
   }
 
+  /**
+   * Uses fpgraph module to call facebook API. Once the response arrives it's
+   * emitted by the stream. When the response consists of a few pages, each page
+   * is emitted separately.
+   * @param {String} url - an endpoint of Facebook Graph API
+   **/
   callGraphAPI(url) {
     Q.denodeify(graph.get)(url).then(res => {
       this.write(res.data);
