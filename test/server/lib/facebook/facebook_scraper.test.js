@@ -7,7 +7,7 @@ import logger from '../../../../server/utils/logger.js';
 import FeedStream from '../../../../server/lib/facebook/feed_stream';
 import FacebookScraper from '../../../../server/lib/facebook/facebook_scraper.js';
 
-describe('FacebookScraper', () => {
+describe('facebook_scraper', () => {
   let sandbox;
   let scraper;
   const fakeAccount = 'manchesterunited';
@@ -35,7 +35,9 @@ describe('FacebookScraper', () => {
     beforeEach(() => {
       fakeStream = new FeedStream();
       sandbox.stub(scraper, '_getDataStream').returns(fakeStream);
-      sandbox.stub(scraper, '_saveFeed');
+      sandbox.stub(scraper, '_saveFeed').returns(new Q());
+      sandbox.stub(scraper, '_success');
+      sandbox.stub(scraper, '_failure');
       sandbox.stub(FeedStream.prototype, 'callGraphAPI');
       scraper.scrape();
     });
@@ -46,8 +48,8 @@ describe('FacebookScraper', () => {
       sandbox.stub(logger, 'logError');
 
       fakeStream.emit('error', expectedError);
-      assert.isOk(logger.logError.calledOnce);
-      assert.isOk(logger.logError.calledWith(expectedError));
+      assert.isOk(scraper._failure.calledOnce);
+      assert.isOk(scraper._failure.calledWith(expectedError));
     });
 
     it('builds the result by aggregating each chunk of data and saves it', () => {
@@ -138,6 +140,30 @@ describe('FacebookScraper', () => {
       return scraper._saveFeedInFile(expectedFeed)
         .then(() => Q.denodeify(fs.readFile)(expectedFilePath, 'utf8'))
         .then((data) => { assert.deepEqual(expectedFeed, JSON.parse(data)); });
+    });
+  });
+
+  describe('_success', () => {
+    it('ends the process with `0` status', () => {
+      sandbox.stub(process, 'exit');
+      scraper._success();
+      assert.ok(process.exit.calledOnce);
+      assert.ok(process.exit.calledWith(0));
+    });
+  });
+
+  describe('_failure', () => {
+    it('logs the error and ends the process with `1` status', () => {
+      const error = new Error('Ohh no!');
+      sandbox.stub(process, 'exit');
+      sandbox.stub(logger, 'logError');
+
+      scraper._failure(error);
+
+      assert.ok(process.exit.calledOnce);
+      assert.ok(process.exit.calledWith(1));
+      assert.ok(logger.logError.calledOnce);
+      assert.ok(logger.logError.calledWith(error));
     });
   });
 });

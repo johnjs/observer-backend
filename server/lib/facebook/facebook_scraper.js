@@ -53,11 +53,20 @@ export default class FacebookScraper {
     const stream = this._getDataStream();
     const feed = [];
 
-    stream.on('error', err => logger.logError(err));
+    stream.on('error', err => this._failure(err));
     stream.on('data', chunk => Array.prototype.push.apply(feed, chunk));
-    stream.on('finish', () => this._saveFeed(feed));
+    stream.on('finish', () => this._saveFeed(feed).done(this._success));
 
     stream.callGraphAPI(url);
+  }
+
+  _failure(error) {
+    logger.logError(error);
+    process.exit(1);
+  }
+
+  _success() {
+    process.exit(0);
   }
 
   /**
@@ -80,8 +89,9 @@ export default class FacebookScraper {
 
   _saveFeed(feed) {
     if (config.FEED_DESTINATION === 'FILE') {
-      this._saveFeedInFile(feed);
+      return this._saveFeedInFile(feed);
     }
+    return new Q();
   }
 
   /**
@@ -91,10 +101,7 @@ export default class FacebookScraper {
    */
   _saveFeedInFile(feed) {
     const fileName = `${FEED_DIRECTORY}${this.account}_${(new Date()).toISOString()}.json`;
-    return Q.denodeify(jsonfile.writeFile)(fileName, feed, FEED_FILE_FORMATTING_OPTIONS)
-      .catch((e) => {
-        logger.logError(e);
-      });
+    return Q.denodeify(jsonfile.writeFile)(fileName, feed, FEED_FILE_FORMATTING_OPTIONS);
   }
 }
 

@@ -24,7 +24,7 @@ const fileLogConf = new(WinstonDailyRotateFile)({ // eslint-disable-line no-unus
 });
 
 const winstonTransportsConf = [];
-if (process.env.NODE_ENV !== 'TEST') { winstonTransportsConf.push(consoleLogConf); }
+if (process.env.NODE_ENV !== 'test') { winstonTransportsConf.push(consoleLogConf); }
 
 winston.addColors(colors);
 
@@ -40,6 +40,10 @@ class Logger {
 
   logError(err) {
     this.wlogger.error('[%s] %s %s', moment().format(), err.message, err.stack);
+  }
+
+  logInfo(message) {
+    this.wlogger.info('[%s] %s', moment().format(), message);
   }
 }
 

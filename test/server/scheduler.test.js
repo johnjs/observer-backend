@@ -1,14 +1,16 @@
 import { assert } from 'chai';
 import * as sinon from 'sinon';
 import config from '../../server/config/test.json';
-import * as FacebookRunner from '../../server/lib/facebook/facebook_scraper_runner.js';
+import * as db from '../../server/db.js';
 import scheduleJobs from '../../server/scheduler.js';
+import FacebookRunner from '../../server/lib/facebook/facebook_scraper_runner.js';
 
 describe('scheduler', () => {
   let sandbox;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sandbox.stub(db, 'connect');
   });
 
   afterEach(() => {
@@ -18,7 +20,7 @@ describe('scheduler', () => {
   describe('scheduleJobs', () => {
     let runFacebookStub;
     let clock;
-    const scrapingIntervalInSec = config.SCRAPING_INTERVAL;
+    const scrapingIntervalInSec = config.SCHEDULER_POLLING_INTERVAL;
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
@@ -36,6 +38,11 @@ describe('scheduler', () => {
       assert.isTrue(runFacebookStub.calledOnce);
       clock.tick(10);
       assert.isTrue(runFacebookStub.calledTwice);
+    });
+
+    it('initialises the db connection', () => {
+      scheduleJobs();
+      assert.ok(db.connect.calledOnce);
     });
   });
 });
