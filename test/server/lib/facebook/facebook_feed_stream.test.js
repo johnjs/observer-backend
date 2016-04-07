@@ -1,27 +1,27 @@
-import { PassThrough } from 'stream';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
-import FeedStream from '../../../../server/lib/facebook/feed_stream';
+import AbstractFeedStream from '../../../../server/lib/abstract_feed_stream';
+import FacebookFeedStream from '../../../../server/lib/facebook/facebook_feed_stream';
 import fbgraph from '../../../../server/lib/facebook/fbgraph.js';
 
-describe('feed_stream', () => {
+describe('facebook_feed_stream', () => {
   let stream;
 
   beforeEach(() => {
-    stream = new FeedStream();
+    stream = new FacebookFeedStream();
   });
 
-  it('extends PassThrough stream', () => {
-    assert.instanceOf(stream, PassThrough);
+  it('extends AbstractFeedStream stream', () => {
+    assert.instanceOf(stream, AbstractFeedStream);
   });
 
-  describe('callGraphAPI', () => {
+  describe('streamFeed', () => {
     const url = 'https://fake.url.com';
     let sandbox;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      sandbox.spy(stream, 'callGraphAPI');
+      sandbox.spy(stream, 'streamFeed');
       sandbox.spy(stream, 'write');
       sandbox.stub(fbgraph, 'get');
     });
@@ -37,13 +37,13 @@ describe('feed_stream', () => {
         fbgraph.get.yieldsAsync(null, apiResponse);
 
         stream.on('finish', () => {
-          assert.ok(stream.callGraphAPI.calledOnce);
+          assert.ok(stream.streamFeed.calledOnce);
           assert.ok(stream.write.calledOnce);
           assert.ok(stream.write.calledWith(apiResponse.data));
           done();
         });
 
-        stream.callGraphAPI(url);
+        stream.streamFeed(url);
       });
     });
 
@@ -62,9 +62,9 @@ describe('feed_stream', () => {
         fbgraph.get.onCall(1).yieldsAsync(null, secondApiResponse);
 
         stream.on('finish', () => {
-          assert.ok(stream.callGraphAPI.calledTwice);
-          assert.equal(stream.callGraphAPI.firstCall.args[0], url);
-          assert.equal(stream.callGraphAPI.secondCall.args[0], firstApiResponse.paging.next);
+          assert.ok(stream.streamFeed.calledTwice);
+          assert.equal(stream.streamFeed.firstCall.args[0], url);
+          assert.equal(stream.streamFeed.secondCall.args[0], firstApiResponse.paging.next);
 
           assert.ok(stream.write.calledTwice);
           assert.equal(stream.write.firstCall.args[0], firstApiResponse.data);
@@ -73,7 +73,7 @@ describe('feed_stream', () => {
           done();
         });
 
-        stream.callGraphAPI(url);
+        stream.streamFeed(url);
       });
     });
 
@@ -86,7 +86,7 @@ describe('feed_stream', () => {
           assert.deepEqual(actualError, expectedError);
           done();
         });
-        stream.callGraphAPI();
+        stream.streamFeed();
       });
     });
   });

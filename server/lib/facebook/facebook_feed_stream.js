@@ -2,18 +2,11 @@
  * Module streas facebook feed
  **/
 
-import { PassThrough } from 'stream';
+import AbstractFeedStream from './../abstract_feed_stream';
 import graph from './fbgraph';
 import Q from 'q';
 
-export default class FeedStream extends PassThrough {
-
-  constructor() {
-    super({
-      decodeStrings: true,
-      objectMode: true,
-    });
-  }
+export default class FacebookFeedStream extends AbstractFeedStream {
 
   /**
    * Uses fpgraph module to call facebook API. Once the response arrives it's
@@ -21,11 +14,11 @@ export default class FeedStream extends PassThrough {
    * is emitted separately.
    * @param {String} url - an endpoint of Facebook Graph API
    **/
-  callGraphAPI(url) {
+  streamFeed(url) {
     Q.denodeify(graph.get)(url).then(res => {
       this.write(res.data);
       if (res.paging && res.paging.next) {
-        this.callGraphAPI(res.paging.next);
+        this.streamFeed(res.paging.next);
       } else {
         this.end();
       }
