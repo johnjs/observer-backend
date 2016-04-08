@@ -1,5 +1,9 @@
 {
     "MONGODB_DATABASE": "observer_backend",
     "SCHEDULER_POLLING_INTERVAL": 10,
-    "SCRAPING_INTERVAL": 1
+    "SCRAPING_INTERVAL": 1,
+    "TWITTER_CONSUMER_KEY": "fakekey",
+    "TWITTER_CONSUMER_SECRET": "fakesecret",
+    "TWITTER_ACCESS_TOKEN": "faketoken",
+    "TWITTER_ACCESS_TOKEN_SECRET": "faketokensecret"
 }
