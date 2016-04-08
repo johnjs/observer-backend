@@ -3,12 +3,12 @@ import { default as childProcess } from 'child_process';
 import Q from 'q';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
-import * as db from '../../../../server/db';
-import FacebookScraperRunner from '../../../../server/lib/facebook/facebook_scraper_runner';
-import logger from '../../../../server/utils/logger';
+import * as db from '../../../server/db';
+import ScraperRunner from '../../../server/lib/scraper_runner';
+import logger from '../../../server/utils/logger';
 
 
-describe('facebook_scraper_runner', () => {
+describe('scraper_runner', () => {
   let sandbox;
 
   beforeEach(() => {
@@ -29,17 +29,17 @@ describe('facebook_scraper_runner', () => {
       });
     });
 
-    it('runs the scraper for each facebook job returned by FacebookJob#findJobsToRun()', (done) => {
+    it('runs the scraper for each job returned by ScrapingJob#findJobsToRun()', (done) => {
       const fakeJobs = [{ a: 1 }, { a: 2 }];
-      sandbox.stub(FacebookScraperRunner, '_runSingleScraper');
+      sandbox.stub(ScraperRunner, '_runSingleScraper');
 
-      FacebookScraperRunner.run();
+      ScraperRunner.run();
       deferred.resolve(fakeJobs);
 
       process.nextTick(() => {
-        assert.ok(FacebookScraperRunner._runSingleScraper.calledTwice);
-        assert.deepEqual(FacebookScraperRunner._runSingleScraper.firstCall.args, [{ a: 1 }]);
-        assert.deepEqual(FacebookScraperRunner._runSingleScraper.secondCall.args, [{ a: 2 }]);
+        assert.ok(ScraperRunner._runSingleScraper.calledTwice);
+        assert.deepEqual(ScraperRunner._runSingleScraper.firstCall.args, [{ a: 1 }]);
+        assert.deepEqual(ScraperRunner._runSingleScraper.secondCall.args, [{ a: 2 }]);
         done();
       });
     });
@@ -52,7 +52,7 @@ describe('facebook_scraper_runner', () => {
       it('logs the error', (done) => {
         const expectedError = new Error('Ohh no!');
 
-        FacebookScraperRunner.run();
+        ScraperRunner.run();
         deferred.reject(expectedError);
 
         process.nextTick(() => {
@@ -70,21 +70,21 @@ describe('facebook_scraper_runner', () => {
 
     beforeEach(() => {
       fakeJob = {
-        facebook_account: 'michael_corleone',
-        facebook_token: 'godfather',
+        account: 'michael_corleone',
         scheduleNextRun: sandbox.stub(),
+        type: 'twitter',
       };
       fakeScaperProcess = new EventEmitter();
       sandbox.stub(childProcess, 'fork').returns(fakeScaperProcess);
     });
 
     it('creates a child process running the scraper', () => {
-      FacebookScraperRunner._runSingleScraper(fakeJob);
+      ScraperRunner._runSingleScraper(fakeJob);
       assert.ok(childProcess.fork.calledOnce);
       const forkArgs = childProcess.fork.firstCall.args;
 
-      assert.match(forkArgs[0], /facebook_scraper$/);
-      assert.deepEqual(forkArgs[1], [fakeJob.facebook_account, fakeJob.facebook_token]);
+      assert.match(forkArgs[0], /twitter_scraper$/);
+      assert.deepEqual(forkArgs[1], [fakeJob.account]);
       assert.deepEqual(forkArgs[2], { silent: false });
     });
 
@@ -100,7 +100,7 @@ describe('facebook_scraper_runner', () => {
 
       it('logs the success info', (done) => {
         const expectedLog = 'Scraping of michael_corleone finished with success';
-        FacebookScraperRunner._runSingleScraper(fakeJob);
+        ScraperRunner._runSingleScraper(fakeJob);
 
         fakeScaperProcess.emit('exit', 0);
 
@@ -112,7 +112,7 @@ describe('facebook_scraper_runner', () => {
       });
 
       it('schedules next run of the job', (done) => {
-        FacebookScraperRunner._runSingleScraper(fakeJob);
+        ScraperRunner._runSingleScraper(fakeJob);
 
         fakeScaperProcess.emit('exit', 0);
 
@@ -125,7 +125,7 @@ describe('facebook_scraper_runner', () => {
       describe('when scheduling of next job`s run failed', () => {
         it('logs the error', (done) => {
           const expectedError = new Error('They killed Michael!');
-          FacebookScraperRunner._runSingleScraper(fakeJob);
+          ScraperRunner._runSingleScraper(fakeJob);
 
           fakeScaperProcess.emit('exit', 0);
           scheduleNextRunDefer.reject(expectedError);
@@ -145,7 +145,7 @@ describe('facebook_scraper_runner', () => {
       });
 
       it('logs the info', (done) => {
-        FacebookScraperRunner._runSingleScraper(fakeJob);
+        ScraperRunner._runSingleScraper(fakeJob);
         fakeScaperProcess.emit('exit', 1);
 
         process.nextTick(() => {
@@ -153,6 +153,17 @@ describe('facebook_scraper_runner', () => {
           assert.ok(logger.logInfo.calledWith('Scraping of michael_corleone failed'));
           done();
         });
+      });
+    });
+
+    describe('when a job type is not defined', () => {
+      beforeEach(() => {
+        delete fakeJob.type;
+      });
+
+      it('throws an error', () => {
+        const expectedErrorMsg = 'Allowed types of scraping jobs are: facebook,twitter';
+        assert.throws(() => { ScraperRunner._runSingleScraper(fakeJob); }, expectedErrorMsg);
       });
     });
   });

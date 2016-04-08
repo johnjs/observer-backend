@@ -1,8 +1,9 @@
 import { CronJob } from 'cron';
 import * as db from './db';
 import config from './config/config';
+import { isExecutedAsScript } from './utils/module_utils';
 import logger from './utils/logger';
-import FacebookRunner from './lib/facebook/facebook_scraper_runner.js';
+import ScraperRunner from './lib/scraper_runner.js';
 
 
 /**
@@ -14,7 +15,7 @@ export default function scheduleJobs() {
     cronTime: `*/${config.SCHEDULER_POLLING_INTERVAL} * * * * *`,
     onTick: () => {
       logger.logInfo('Crone job triggered...');
-      FacebookRunner.run();
+      ScraperRunner.run();
     },
     start: false,
     timeZone: 'Europe/Berlin',
@@ -24,6 +25,6 @@ export default function scheduleJobs() {
   job.start();
 }
 
-if (require.main === module) {
+if (isExecutedAsScript(module)) {
   scheduleJobs();
 }
