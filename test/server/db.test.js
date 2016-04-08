@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
 import logger from '../../server/utils/logger';
-import facebookJobSchema from '../../server/lib/facebook/facebook_job_schema';
+import scrapingJobSchema from '../../server/lib/scraping_job_schema';
 import * as db from '../../server/db';
 
 describe('db', () => {
@@ -84,19 +84,19 @@ describe('db', () => {
 
   describe('getModelClass', () => {
     it('returns the data model for a given name', () => {
-      const fakeFacebookJobModel = { a: 1 };
+      const fakeScrapingJobModel = { a: 1 };
       connectionStub.model
-                .withArgs('facebook_jobs', facebookJobSchema)
-                .returns(fakeFacebookJobModel);
+                .withArgs('scraping_jobs', scrapingJobSchema)
+                .returns(fakeScrapingJobModel);
 
       db.connect();
-      assert.equal(db.getModelClass('facebook_job'), fakeFacebookJobModel);
+      assert.equal(db.getModelClass('scraping_job'), fakeScrapingJobModel);
     });
 
     it('throws an error if data models have not been'
             + 'initialised yet by the `connect` method', () => {
       const expectedErrorMsg = 'Models has not been initialised yet.';
-      assert.throws(() => { db.getModelClass('facebook_job'); }, expectedErrorMsg);
+      assert.throws(() => { db.getModelClass('scraping_job'); }, expectedErrorMsg);
     });
   });
 });

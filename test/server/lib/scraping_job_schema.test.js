@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import * as sinon from 'sinon';
 import mongoose from 'mongoose';
-import FacebookJobSchema from '../../../../server/lib/facebook/facebook_job_schema';
+import ScrapingJobSchema from '../../../server/lib/scraping_job_schema';
 
-describe('facebook_job_schema', () => {
+describe('scraping_job_schema', () => {
   let sandbox;
   let currentTime;
 
@@ -18,13 +18,13 @@ describe('facebook_job_schema', () => {
   });
 
   it('is an instance of mongoose#Schema', () => {
-    assert.instanceOf(FacebookJobSchema, mongoose.Schema);
+    assert.instanceOf(ScrapingJobSchema, mongoose.Schema);
   });
 
   describe('statics', () => {
     describe('findJobsToRun', () => {
       it('looks for jobs whose `next_run` date is earlier than the current time', (done) => {
-        const method = FacebookJobSchema.statics.findJobsToRun;
+        const method = ScrapingJobSchema.statics.findJobsToRun;
         const expectedResult = [{ a: 1 }];
         const fakeJobInstance = {
           find: sandbox.stub().yieldsAsync(null, expectedResult),
@@ -46,7 +46,7 @@ describe('facebook_job_schema', () => {
   describe('methods', () => {
     describe('scheduleNextRun', () => {
       it('sets job`s next_run date', (done) => {
-        const method = FacebookJobSchema.methods.scheduleNextRun;
+        const method = ScrapingJobSchema.methods.scheduleNextRun;
         const expectedNextRunDate = new Date('2016-04-02T06:10:00.000Z');
         const fakeJobInstance = {
           scraping_interval: 10,
