@@ -31,6 +31,7 @@
     "eslint-plugin-react": "^4.2.3",
     "istanbul": "^1.0.0-alpha.2",
     "mocha": "^2.4.5",
+    "proxyquire": "^1.7.4",
     "sinon": "^1.17.3"
   },
   "scripts": {
