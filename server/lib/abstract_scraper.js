@@ -5,6 +5,7 @@
 import jsonfile from 'jsonfile';
 import config from './../config/config';
 import logger from './../utils/logger.js';
+import NotImplementedError from '../errors/not_implemented_error';
 import Q from 'q';
 
 const FEED_FILE_FORMATTING_OPTIONS = { spaces: 2 };
@@ -53,29 +54,29 @@ export default class AbstractScraper {
   /**
    * Abstract method which should be overriden by child classes. Method should
    * return an instance of a stream class extending AbstractFeedStream.
-   * @throws {Error}
+   * @throws {NotImplementedError}
    **/
   _getDataStream() {
-    throw new Error('The "_getDataStream" method must be implemented!');
+    throw new NotImplementedError('_getDataStream');
   }
 
   /**
    * Abstract method which should be overriden by child classes. Method should
    * return parameters needed to invoke the `streamFeed` method of the object
    * returned by `_getDataStream` method.
-   * @throws {Error}
+   * @throws {NotImplementedError}
    **/
   _getStreamingOptions() {
-    throw new Error('The "_getStreamingOptions" method must be implemented!');
+    throw new NotImplementedError('_getStreamingOptions');
   }
 
   /**
    * Abstract method which should be overriden by child classes. Method should
    * return a relative path to the directory used to store feed as a json file.
-   * @throws {Error}
+   * @throws {NotImplementedError}
    **/
   _getFeedDirectory() {
-    throw new Error('The "_getFeedDirectory" method must be implemented!');
+    throw new NotImplementedError('_getFeedDirectory');
   }
 
   _saveFeed(feed) {

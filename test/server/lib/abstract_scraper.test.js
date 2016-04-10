@@ -4,6 +4,7 @@ import Q from 'q';
 import fs from 'fs';
 import logger from '../../../server/utils/logger.js';
 import config from '../../../server/config/config.js';
+import NotImplementedError from '../../../server/errors/not_implemented_error';
 import AbstractFeedStream from '../../../server/lib/abstract_feed_stream';
 import AbstractScraper from '../../../server/lib/abstract_scraper';
 
@@ -75,7 +76,7 @@ describe('abstract_scraper', () => {
     describe(methodName, () => {
       it('throws an error', () => {
         const expectedErrorMsg = `The "${methodName}" method must be implemented!`;
-        assert.throws(scraper[methodName].bind(scraper), expectedErrorMsg);
+        assert.throws(scraper[methodName].bind(scraper), NotImplementedError, expectedErrorMsg);
       });
     });
   });

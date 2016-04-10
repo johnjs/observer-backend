@@ -1,7 +1,7 @@
 /**
  * Base class for feed streams.
  **/
-
+import NotImplementedError from '../errors/not_implemented_error';
 import { PassThrough } from 'stream';
 
 export default class AbstractFeedStream extends PassThrough {
@@ -18,6 +18,6 @@ export default class AbstractFeedStream extends PassThrough {
    * specific services. Needs to be implemented in child classes.
    **/
   streamFeed() {
-    throw new Error('The "streamFeed" method must be implemented!');
+    throw new NotImplementedError('streamFeed');
   }
 }
