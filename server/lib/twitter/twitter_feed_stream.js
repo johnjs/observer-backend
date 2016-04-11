@@ -8,6 +8,8 @@ import Twit from 'twit';
 import { chain, extend } from 'underscore';
 import config from '../../config/config';
 
+const TWITTER_REQUEST_TIMEOUT = 1000 * 30; // value in milliseconds
+
 export default class TwitterFeedStream extends AbstractFeedStream {
 
   constructor() {
@@ -17,6 +19,7 @@ export default class TwitterFeedStream extends AbstractFeedStream {
       consumer_secret: config.TWITTER_CONSUMER_SECRET,
       access_token: config.TWITTER_ACCESS_TOKEN,
       access_token_secret: config.TWITTER_ACCESS_TOKEN_SECRET,
+      timeout_ms: TWITTER_REQUEST_TIMEOUT,
     });
   }
 

@@ -23,43 +23,68 @@ describe('scraping_job_schema', () => {
 
   describe('statics', () => {
     describe('findJobsToRun', () => {
-      it('looks for jobs whose `next_run` date is earlier than the current time', (done) => {
+      it('looks for jobs whose `next_run` date is earlier than the current time', () => {
         const method = ScrapingJobSchema.statics.findJobsToRun;
         const expectedResult = [{ a: 1 }];
         const fakeJobInstance = {
           find: sandbox.stub().yieldsAsync(null, expectedResult),
         };
 
-        method.apply(fakeJobInstance).then((actualResult) => {
+        return method.apply(fakeJobInstance).then((actualResult) => {
           assert.equal(actualResult, expectedResult);
           assert.ok(fakeJobInstance.find.calledOnce);
           assert.deepEqual(
             fakeJobInstance.find.firstCall.args[0],
-            { next_run: { $lte: new Date(currentTime) } }
+            {
+              next_run: { $lte: new Date(currentTime) },
+              is_running: { $eq: false },
+            }
           );
-          done();
         });
       });
     });
   });
 
   describe('methods', () => {
+    let fakeJobInstance;
+
+    beforeEach(() => {
+      fakeJobInstance = {
+        scraping_interval: 10,
+        update: sandbox.stub().yieldsAsync(),
+      };
+    });
+
     describe('scheduleNextRun', () => {
-      it('sets job`s next_run date', (done) => {
+      it('sets job`s next_run date', () => {
         const method = ScrapingJobSchema.methods.scheduleNextRun;
         const expectedNextRunDate = new Date('2016-04-02T06:10:00.000Z');
-        const fakeJobInstance = {
-          scraping_interval: 10,
-          update: sandbox.stub().yieldsAsync(),
-        };
 
-        method.apply(fakeJobInstance).then(() => {
+        return method.apply(fakeJobInstance).then(() => {
           assert.ok(fakeJobInstance.update.calledOnce);
           assert.deepEqual(
             fakeJobInstance.update.firstCall.args[0],
-            { next_run: expectedNextRunDate }
+            {
+              next_run: expectedNextRunDate,
+              is_running: false,
+            }
           );
-          done();
+        });
+      });
+    });
+
+    describe('markAsRunning', () => {
+      it('sets marks the job as currently running', () => {
+        const method = ScrapingJobSchema.methods.markAsRunning;
+
+        return method.apply(fakeJobInstance).then(() => {
+          assert.ok(fakeJobInstance.update.calledOnce);
+          assert.deepEqual(
+            fakeJobInstance.update.firstCall.args[0],
+            {
+              is_running: true,
+            }
+          );
         });
       });
     });
