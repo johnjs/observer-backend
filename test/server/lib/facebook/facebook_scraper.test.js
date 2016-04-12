@@ -1,10 +1,8 @@
-import fs from 'fs';
-import Q from 'q';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
-import config from '../../../../server/config/config.js';
-import logger from '../../../../server/utils/logger.js';
-import FeedStream from '../../../../server/lib/facebook/feed_stream';
+import proxyquire from 'proxyquire';
+import AbstractScraper from '../../../../server/lib/abstract_scraper.js';
+import FacebookFeedStream from '../../../../server/lib/facebook/facebook_feed_stream';
 import FacebookScraper from '../../../../server/lib/facebook/facebook_scraper.js';
 
 describe('facebook_scraper', () => {
@@ -23,61 +21,23 @@ describe('facebook_scraper', () => {
   });
 
   describe('constructor', () => {
+    it('extends the abstract scraper', () => {
+      assert.instanceOf(scraper, AbstractScraper);
+    });
+
     it('initialises token and account name', () => {
       assert.equal(scraper.token, fakeToken);
-      assert.equal(scraper.account, fakeAccount);
-    });
-  });
-
-  describe('scrape', () => {
-    let fakeStream;
-
-    beforeEach(() => {
-      fakeStream = new FeedStream();
-      sandbox.stub(scraper, '_getDataStream').returns(fakeStream);
-      sandbox.stub(scraper, '_saveFeed').returns(new Q());
-      sandbox.stub(scraper, '_success');
-      sandbox.stub(scraper, '_failure');
-      sandbox.stub(FeedStream.prototype, 'callGraphAPI');
-      scraper.scrape();
-    });
-
-    it('logs the error when the feed stream emits one', () => {
-      const expectedError = new Error('There`s no milk in the fridge!');
-
-      sandbox.stub(logger, 'logError');
-
-      fakeStream.emit('error', expectedError);
-      assert.isOk(scraper._failure.calledOnce);
-      assert.isOk(scraper._failure.calledWith(expectedError));
-    });
-
-    it('builds the result by aggregating each chunk of data and saves it', () => {
-      const firstChunk = [{ a: 1 }];
-      const secondChunk = [{ b: 2 }];
-      const expectedSavedResult = [{ a: 1 }, { b: 2 }];
-
-      fakeStream.emit('data', firstChunk);
-      fakeStream.emit('data', secondChunk);
-
-      assert.equal(scraper._saveFeed.callCount, 0);
-
-      fakeStream.emit('finish');
-
-      assert.isOk(scraper._saveFeed.calledOnce);
-      assert.isOk(scraper._saveFeed.calledWith(expectedSavedResult));
+      assert.equal(scraper.accountName, fakeAccount);
     });
   });
 
   describe('_getDataStream', () => {
-    it('returns instance of FeedStream', () => {
-      const stream = scraper._getDataStream();
-      assert.instanceOf(stream, FeedStream);
+    it('returns instance of FacebookFeedStream', () => {
+      assert.instanceOf(scraper._getDataStream(), FacebookFeedStream);
     });
   });
 
-
-  describe('_buildRequestUrl', () => {
+  describe('_getStreamingOptions', () => {
     const currentTime = '2016-03-26T05:50:25.300Z';
     const expectedSinceParam = '2016-03-25T05:50:25.300Z';
     const expectedFielsParam = ['message', 'created_time', 'comments.limit(0).summary(true)',
@@ -94,76 +54,28 @@ describe('facebook_scraper', () => {
         `&fields=${expectedFielsParam}`,
         `&since=${expectedSinceParam}&limit=100`,
       ].join('');
-      const actualUrl = scraper._buildRequestUrl();
+      const actualUrl = scraper._getStreamingOptions();
 
-      assert.equal(actualUrl, expectedUrl);
+      assert.deepEqual(actualUrl, [expectedUrl]);
     });
   });
 
-  describe('_saveFeed', () => {
-    describe('when the config.FEED_DESTINATION equals FILE', () => {
-      let INITIAL_FEED_DESTINATION;
+  describe('_getFeedDirectory', () => {
+    it('returns a proper relative path to the directory', () => {
+      const expectedDirPath = './feed/facebook/';
+      assert.equal(scraper._getFeedDirectory(), expectedDirPath);
+    });
+  });
 
-      beforeEach(() => {
-        INITIAL_FEED_DESTINATION = config.FEED_DESTINATION;
-        config.FEED_DESTINATION = 'FILE';
+  describe('when the scraper is invoked as an executable node script', () => {
+    it('creates an instance of FacebookScraper and starts scraping', () => {
+      const scrapeStub = sandbox.stub(AbstractScraper.prototype, 'scrape');
+      proxyquire('../../../../server/lib/facebook/facebook_scraper.js', {
+        '../../utils/module_utils': {
+          isExecutedAsScript: () => true,
+        },
       });
-
-      afterEach(() => {
-        config.FEED_DESTINATION = INITIAL_FEED_DESTINATION;
-      });
-
-      it('runs the `_saveFeedInFile` method', () => {
-        const dataToSave = { a: 1 };
-
-        sandbox.stub(scraper, '_saveFeedInFile');
-        scraper._saveFeed(dataToSave);
-
-        assert.ok(scraper._saveFeedInFile.calledWith(dataToSave));
-      });
-    });
-  });
-
-  describe('_saveFeedInFile', () => {
-    const currentTime = '2016-03-26T05:50:25.300Z';
-    const expectedFilePath = `./feed/facebook/${fakeAccount}_${currentTime}.json`;
-
-    beforeEach(() => {
-      sandbox.useFakeTimers(new Date(currentTime).valueOf());
-    });
-
-    afterEach(() => Q.denodeify(fs.unlink)(expectedFilePath));
-
-    it('saves the feed in a json file', () => {
-      const expectedFeed = { a: 1 };
-
-      return scraper._saveFeedInFile(expectedFeed)
-        .then(() => Q.denodeify(fs.readFile)(expectedFilePath, 'utf8'))
-        .then((data) => { assert.deepEqual(expectedFeed, JSON.parse(data)); });
-    });
-  });
-
-  describe('_success', () => {
-    it('ends the process with `0` status', () => {
-      sandbox.stub(process, 'exit');
-      scraper._success();
-      assert.ok(process.exit.calledOnce);
-      assert.ok(process.exit.calledWith(0));
-    });
-  });
-
-  describe('_failure', () => {
-    it('logs the error and ends the process with `1` status', () => {
-      const error = new Error('Ohh no!');
-      sandbox.stub(process, 'exit');
-      sandbox.stub(logger, 'logError');
-
-      scraper._failure(error);
-
-      assert.ok(process.exit.calledOnce);
-      assert.ok(process.exit.calledWith(1));
-      assert.ok(logger.logError.calledOnce);
-      assert.ok(logger.logError.calledWith(error));
+      assert.ok(scrapeStub.calledOnce);
     });
   });
 });

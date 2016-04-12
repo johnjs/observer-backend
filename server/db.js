@@ -5,7 +5,7 @@
 import mongoose from 'mongoose';
 import logger from './utils/logger';
 import config from './config/config';
-import facebookJobSchema from './lib/facebook/facebook_job_schema';
+import scrapingJobSchema from './lib/scraping_job_schema';
 
 let connection;
 let modelClasses;
@@ -16,7 +16,7 @@ let modelClasses;
 */
 function _initModels() {
   modelClasses = {
-    facebook_job: connection.model('facebook_jobs', facebookJobSchema),
+    scraping_job: connection.model('scraping_jobs', scrapingJobSchema),
   };
 }
 
