@@ -1,39 +1,51 @@
 /**
  * Base class for scrapers.
  **/
-
-import jsonfile from 'jsonfile';
-import config from './../config/config';
-import logger from './../utils/logger.js';
+import logger from './../utils/logger';
 import NotImplementedError from '../errors/not_implemented_error';
-import Q from 'q';
-
-const FEED_FILE_FORMATTING_OPTIONS = { spaces: 2 };
+import FeedOutputStreamFactory from './feed_output_stream_factory';
+import multipipe from 'multipipe';
 
 export default class AbstractScraper {
 
   /**
    * @constructor
+   * @param {String} serivce - name of data provider (e.g. 'facebook')
    * @param {String} accountName - name of the scraped account
    **/
-  constructor(accountName) {
+  constructor(source, accountName) {
+    this.source = source;
     this.accountName = accountName;
   }
 
   /**
-   * Uses a data stream to fetch posts/mentions and saves the feed
-   * when fetching is done.
+   * Reads feed from the input data stream and redirects it using pipes to
+   * the output data stream returned by FeedStorageFactory.
    **/
   scrape() {
-    const stream = this._getDataStream();
-    const streamingOptions = this._getStreamingOptions();
-    const feed = [];
+    const inputDataStream = this._getDataStream();
+    FeedOutputStreamFactory.getStream(this.accountName, this.source).then((outputDataStream) => {
+      this._startDataFlow(inputDataStream, outputDataStream);
+    });
+  }
 
-    stream.on('error', err => this._failure(err));
-    stream.on('data', chunk => Array.prototype.push.apply(feed, chunk));
-    stream.on('finish', () => this._saveFeed(feed).done(this._success));
-
-    stream.streamFeed.apply(stream, streamingOptions);
+  /**
+   * Initiates the data flow between input and output streams passed
+   * as function arguments. Once streams are combined, transmission is started.
+   * Uses the "multipipe" module to create a duplex stream and handle errors coming
+   * from the whole pipeline in once place.
+   * @param {Readable} input stream
+   * @param {Writable} output stream
+   **/
+  _startDataFlow(inputDataStream, outputDataStream) {
+    const pipeline = multipipe(inputDataStream, outputDataStream, (err) => {
+      if (!err) {
+        this._success();
+      }
+    });
+    pipeline.on('error', err => {
+      this._failure(err);
+    });
   }
 
   /**
@@ -58,42 +70,5 @@ export default class AbstractScraper {
    **/
   _getDataStream() {
     throw new NotImplementedError('_getDataStream');
-  }
-
-  /**
-   * Abstract method which should be overriden by child classes. Method should
-   * return parameters needed to invoke the `streamFeed` method of the object
-   * returned by `_getDataStream` method.
-   * @throws {NotImplementedError}
-   **/
-  _getStreamingOptions() {
-    throw new NotImplementedError('_getStreamingOptions');
-  }
-
-  /**
-   * Abstract method which should be overriden by child classes. Method should
-   * return a relative path to the directory used to store feed as a json file.
-   * @throws {NotImplementedError}
-   **/
-  _getFeedDirectory() {
-    throw new NotImplementedError('_getFeedDirectory');
-  }
-
-  _saveFeed(feed) {
-    if (config.FEED_DESTINATION === 'FILE') {
-      return this._saveFeedInFile(feed);
-    }
-    return new Q();
-  }
-
-  /**
-   * Saves the feed in JSON file in the directory defined by #_getFeedDirectory method.
-   * Name of the file is built as a concatenation of account's name and current date time.
-   * @param {object} feed - posts/mentions fetched for a given account
-   */
-  _saveFeedInFile(feed) {
-    const feedDir = this._getFeedDirectory();
-    const fileName = `${feedDir}${this.accountName}_${(new Date()).toISOString()}.json`;
-    return Q.denodeify(jsonfile.writeFile)(fileName, feed, FEED_FILE_FORMATTING_OPTIONS);
   }
 }

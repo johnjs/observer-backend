@@ -7,6 +7,11 @@ import Q from 'q';
 
 export default class FacebookFeedStream extends AbstractFeedStream {
 
+
+  /**
+   * @constructor
+   * @param {string} url - API end point returning facebook data
+   */
   constructor(url) {
     super();
     this._url = url;

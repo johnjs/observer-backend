@@ -1,12 +1,12 @@
 import { assert } from 'chai';
 import * as sinon from 'sinon';
+import EventEmitter from 'events';
+import stream from 'stream';
 import Q from 'q';
-import fs from 'fs';
-import logger from '../../../server/utils/logger.js';
-import config from '../../../server/config/config.js';
 import NotImplementedError from '../../../server/errors/not_implemented_error';
-import AbstractFeedStream from '../../../server/lib/abstract_feed_stream';
 import AbstractScraper from '../../../server/lib/abstract_scraper';
+import FeedOutputStreamFactory from '../../../server/lib/feed_output_stream_factory';
+import logger from '../../../server/utils/logger.js';
 
 describe('abstract_scraper', () => {
   let sandbox;
@@ -23,56 +23,68 @@ describe('abstract_scraper', () => {
   });
 
   describe('scrape', () => {
-    let fakeStream;
-    const fakeStreamingOpts = [{ bar: 'foo' }];
+    let fakeInputStream;
+    let fakeOutputStream;
+    let outputStreamDeferred;
 
     beforeEach(() => {
-      fakeStream = new AbstractFeedStream();
+      outputStreamDeferred = Q.defer();
+      fakeInputStream = new EventEmitter();
+      fakeOutputStream = new EventEmitter();
 
-      sandbox.stub(scraper, '_getDataStream').returns(fakeStream);
-      sandbox.stub(scraper, '_saveFeed').returns(new Q());
-      sandbox.stub(scraper, '_success');
-      sandbox.stub(scraper, '_failure');
-      sandbox.stub(scraper, '_getStreamingOptions').returns(fakeStreamingOpts);
-      sandbox.stub(AbstractFeedStream.prototype, 'streamFeed');
+      sandbox.stub(FeedOutputStreamFactory, 'getStream').returns(outputStreamDeferred.promise);
+      sandbox.stub(scraper, '_getDataStream').returns(fakeInputStream);
+      sandbox.stub(scraper, '_startDataFlow');
     });
 
-    it('should invoke the "streamFeed" method with proper streaming options', () => {
+    it('starts the data flow by piping input and output data streams', (done) => {
       scraper.scrape();
-      assert.deepEqual(fakeStream.streamFeed.firstCall.args, fakeStreamingOpts);
-    });
+      outputStreamDeferred.resolve(fakeOutputStream);
 
-    it('logs the error when the feed stream emits one', () => {
-      const expectedError = new Error('There`s no milk in the fridge!');
-
-      sandbox.stub(logger, 'logError');
-
-      scraper.scrape();
-      fakeStream.emit('error', expectedError);
-
-      assert.isOk(scraper._failure.calledOnce);
-      assert.isOk(scraper._failure.calledWith(expectedError));
-    });
-
-    it('builds the result by aggregating each chunk of data and saves it', () => {
-      const firstChunk = [{ a: 1 }];
-      const secondChunk = [{ b: 2 }];
-      const expectedSavedResult = [{ a: 1 }, { b: 2 }];
-
-      scraper.scrape();
-      fakeStream.emit('data', firstChunk);
-      fakeStream.emit('data', secondChunk);
-
-      assert.equal(scraper._saveFeed.callCount, 0);
-
-      fakeStream.emit('finish');
-
-      assert.isOk(scraper._saveFeed.calledOnce);
-      assert.isOk(scraper._saveFeed.calledWith(expectedSavedResult));
+      process.nextTick(() => {
+        assert.ok(scraper._startDataFlow.calledWith(fakeInputStream, fakeOutputStream));
+        done();
+      });
     });
   });
 
-  ['_getDataStream', '_getFeedDirectory', '_getStreamingOptions'].forEach((methodName) => {
+  describe('_startDataFlow', () => {
+    let dataInputStream;
+    let dataOutputStream;
+
+    beforeEach(() => {
+      class TestInputStream extends stream.Readable {
+        _read() {}
+      }
+
+      class TestOutputStream extends stream.Writable {
+        _write(chunk, encoding, next) { next(); }
+      }
+
+      dataInputStream = new TestInputStream();
+      dataOutputStream = new TestOutputStream();
+    });
+
+    it('runs the "_success" method when the output stream triggers the "finish" event', (done) => {
+      sandbox.stub(scraper, '_success', () => {
+        done();
+      });
+      scraper._startDataFlow(dataInputStream, dataOutputStream);
+      dataOutputStream.emit('finish');
+    });
+
+    it('runs the "_failure" method when one of the streams triggers the "error" event', (done) => {
+      const expectedError = new Error();
+      sandbox.stub(scraper, '_failure', (actualError) => {
+        assert.equal(actualError, expectedError);
+        done();
+      });
+      scraper._startDataFlow(dataInputStream, dataOutputStream);
+      dataInputStream.emit('error', expectedError);
+    });
+  });
+
+  ['_getDataStream'].forEach((methodName) => {
     describe(methodName, () => {
       it('throws an error', () => {
         const expectedErrorMsg = `The "${methodName}" method must be implemented!`;
@@ -85,7 +97,6 @@ describe('abstract_scraper', () => {
     it('ends the process with `0` status', () => {
       sandbox.stub(process, 'exit');
       scraper._success();
-      assert.ok(process.exit.calledOnce);
       assert.ok(process.exit.calledWith(0));
     });
   });
@@ -97,56 +108,8 @@ describe('abstract_scraper', () => {
       sandbox.stub(logger, 'logError');
 
       scraper._failure(error);
-
-      assert.ok(process.exit.calledOnce);
       assert.ok(process.exit.calledWith(1));
-      assert.ok(logger.logError.calledOnce);
       assert.ok(logger.logError.calledWith(error));
-    });
-  });
-
-  describe('_saveFeed', () => {
-    describe('when the config.FEED_DESTINATION equals FILE', () => {
-      let INITIAL_FEED_DESTINATION;
-
-      beforeEach(() => {
-        INITIAL_FEED_DESTINATION = config.FEED_DESTINATION;
-        config.FEED_DESTINATION = 'FILE';
-      });
-
-      afterEach(() => {
-        config.FEED_DESTINATION = INITIAL_FEED_DESTINATION;
-      });
-
-      it('runs the `_saveFeedInFile` method', () => {
-        const dataToSave = { a: 1 };
-
-        sandbox.stub(scraper, '_saveFeedInFile');
-        scraper._saveFeed(dataToSave);
-
-        assert.ok(scraper._saveFeedInFile.calledWith(dataToSave));
-      });
-    });
-  });
-
-  describe('_saveFeedInFile', () => {
-    const currentTime = '2016-03-26T05:50:25.300Z';
-    const expectedFeedDir = './test/server/lib/fixtures/';
-    const expectedFilePath = `${expectedFeedDir}/${accountName}_${currentTime}.json`;
-
-    beforeEach(() => {
-      sandbox.stub(scraper, '_getFeedDirectory').returns(expectedFeedDir);
-      sandbox.useFakeTimers(new Date(currentTime).valueOf());
-    });
-
-    afterEach(() => Q.denodeify(fs.unlink)(expectedFilePath));
-
-    it('saves the feed in a json file', () => {
-      const expectedFeed = { a: 1 };
-
-      return scraper._saveFeedInFile(expectedFeed)
-        .then(() => Q.denodeify(fs.readFile)(expectedFilePath, 'utf8'))
-        .then((data) => { assert.deepEqual(expectedFeed, JSON.parse(data)); });
     });
   });
 });

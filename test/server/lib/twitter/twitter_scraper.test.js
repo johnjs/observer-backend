@@ -38,22 +38,16 @@ describe('twitter_scraper', () => {
 
   describe('_getStreamingOptions', () => {
     it('returns proper arguments used to run feed streaming', () => {
-      const expectedOptions = ['statuses/user_timeline', {
+      const options = scraper._getStreamingOptions();
+
+      assert.equal(options.urlPath, 'statuses/user_timeline');
+      assert.deepEqual(options.requestParameters, {
         screen_name: fakeAccount,
         count: 10,
         trim_user: 1,
         exclude_replies: 1,
-      }];
-      const actualOptions = scraper._getStreamingOptions();
-
-      assert.deepEqual(actualOptions, expectedOptions);
-    });
-  });
-
-  describe('_getFeedDirectory', () => {
-    it('returns a proper relative path to the directory', () => {
-      const expectedDirPath = './feed/twitter/';
-      assert.equal(scraper._getFeedDirectory(), expectedDirPath);
+      });
+      assert.equal(options.numberOfPagesToFetch, 10);
     });
   });
 

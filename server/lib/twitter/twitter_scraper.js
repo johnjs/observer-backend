@@ -6,27 +6,18 @@
  * FEED_DESTINATION=FILE node ./build/lib/twitter/twitter_scraper.js TWITTER_ACCOUNT
  *
  */
-
 import { isExecutedAsScript } from '../../utils/module_utils';
 import TwitterFeedStream from './twitter_feed_stream';
 import AbstractScraper from './../abstract_scraper';
 
+const FEED_PAGE_SIZE = 10;
+const NUMBER_OF_PAGES_IN_FEED = 10;
+const TIMELINE_URL_PATH = 'statuses/user_timeline';
+
 export default class TwitterScraper extends AbstractScraper {
 
-  /**
-   * Prepares invocation arguments for the `stream` method of TwitterFeedStream.
-   * The 'statuses/user_timeline' endpoint returns tweets shown on user's timeline
-   * (without @mentions).
-   **/
-  _getStreamingOptions() {
-    const defaultOptions = {
-      screen_name: this.accountName,
-      count: 10,
-      trim_user: 1,
-      exclude_replies: 1,
-    };
-
-    return ['statuses/user_timeline', defaultOptions];
+  constructor(accountName) {
+    super('twitter', accountName);
   }
 
   /**
@@ -34,15 +25,25 @@ export default class TwitterScraper extends AbstractScraper {
    * @returns {TwitterFeedStream}
    */
   _getDataStream() {
-    return new TwitterFeedStream();
+    const { urlPath, numberOfPagesToFetch, requestParameters } = this._getStreamingOptions();
+    return new TwitterFeedStream(urlPath, requestParameters, numberOfPagesToFetch);
   }
 
   /**
-   * Returns a relative path to the directory where twitter feed should be stored
-   * @returns {String} directory path
+   * Returns parameters needed to initialise the data feed stream.
+   * @returns {Object}
    **/
-  _getFeedDirectory() {
-    return './feed/twitter/';
+  _getStreamingOptions() {
+    return {
+      urlPath: TIMELINE_URL_PATH,
+      numberOfPagesToFetch: NUMBER_OF_PAGES_IN_FEED,
+      requestParameters: {
+        screen_name: this.accountName,
+        count: FEED_PAGE_SIZE,
+        trim_user: 1,
+        exclude_replies: 1,
+      },
+    };
   }
 }
 

@@ -36,35 +36,28 @@ export default class FacebookScraper extends AbstractScraper {
    * @param {string} token - access token used to access Facebook Graph API
    */
   constructor(accountName, token) {
-    super(accountName);
+    super('facebook', accountName);
     this.token = token;
   }
 
   /**
-   * Creates an instance of the stream returning Facebook data.
+   * Creates an instance of the stream fetching Facebook data.
+   * @returns {FacebookFeedStream}
    */
   _getDataStream() {
-    return new FacebookFeedStream();
+    return new FacebookFeedStream(this._buildRequestUrlPath());
   }
 
   /**
   * Builds the path and the query parts of the url used when Facebook API is called
   * Example: /manchesterunited/feed?since=XXX&limit=100
+  * @returns {String} url path
   */
-  _getStreamingOptions() {
+  _buildRequestUrlPath() {
     const reqParams = extend({ access_token: this.token }, getDefaultRequestParams());
     const reqParamsStr = Object.keys(reqParams).reduce(
       (p, k) => p.concat(`${k}=${reqParams[k]}`), []).join('&');
-    return [`${this.accountName}/feed?${reqParamsStr}`];
-  }
-
-  /**
-   * Return a relative path to the directory containing feed which was fetched
-   * and saved as a JSON file.
-   * @returns {String} path
-   **/
-  _getFeedDirectory() {
-    return './feed/facebook/';
+    return `${this.accountName}/feed?${reqParamsStr}`;
   }
 }
 
