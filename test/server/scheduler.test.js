@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import * as sinon from 'sinon';
 import proxyquire from 'proxyquire';
-import config from '../../server/config/test.json';
+import config from '../../server/config/config';
 import * as db from '../../server/db.js';
 import scheduleJobs from '../../server/scheduler.js';
 import ScraperRunner from '../../server/lib/scraper_runner.js';
@@ -21,7 +21,7 @@ describe('scheduler', () => {
   describe('scheduleJobs', () => {
     let runFacebookStub;
     let clock;
-    const scrapingIntervalInSec = config.SCHEDULER_POLLING_INTERVAL;
+    const scrapingIntervalInSec = config.get('SCHEDULER_POLLING_INTERVAL');
     const scrapingIntervalInMiliSec = scrapingIntervalInSec * 1000;
 
     beforeEach(() => {

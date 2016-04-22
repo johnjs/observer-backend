@@ -37,7 +37,7 @@ describe('facebook_scraper', () => {
     });
   });
 
-  describe('_getStreamingOptions', () => {
+  describe('_buildRequestUrlPath', () => {
     const currentTime = '2016-03-26T05:50:25.300Z';
     const expectedSinceParam = '2016-03-25T05:50:25.300Z';
     const expectedFielsParam = ['message', 'created_time', 'comments.limit(0).summary(true)',
@@ -54,16 +54,9 @@ describe('facebook_scraper', () => {
         `&fields=${expectedFielsParam}`,
         `&since=${expectedSinceParam}&limit=100`,
       ].join('');
-      const actualUrl = scraper._getStreamingOptions();
+      const actualUrl = scraper._buildRequestUrlPath();
 
-      assert.deepEqual(actualUrl, [expectedUrl]);
-    });
-  });
-
-  describe('_getFeedDirectory', () => {
-    it('returns a proper relative path to the directory', () => {
-      const expectedDirPath = './feed/facebook/';
-      assert.equal(scraper._getFeedDirectory(), expectedDirPath);
+      assert.deepEqual(actualUrl, expectedUrl);
     });
   });
 

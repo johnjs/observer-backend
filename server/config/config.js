@@ -1,3 +1,7 @@
+/**
+ * Module exports project's configuration. It extends global parameters
+ * with environment-specific ones.
+ **/
 import { extend } from 'underscore';
 import globalConfig from './global.json';
 
@@ -8,4 +12,8 @@ if (process.env.NODE_ENV !== 'test') {
   extend(config, process.env);
 }
 
-export default config;
+export default {
+  get(key) {
+    return config[key];
+  },
+};

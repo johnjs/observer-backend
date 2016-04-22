@@ -5,24 +5,34 @@ import FacebookFeedStream from '../../../../server/lib/facebook/facebook_feed_st
 import fbgraph from '../../../../server/lib/facebook/fbgraph.js';
 
 describe('facebook_feed_stream', () => {
+  const url = 'https://fake.url.com';
   let stream;
 
   beforeEach(() => {
-    stream = new FacebookFeedStream();
+    stream = new FacebookFeedStream(url);
   });
 
-  it('extends AbstractFeedStream stream', () => {
-    assert.instanceOf(stream, AbstractFeedStream);
+  describe('constructor', () => {
+    it('extends AbstractFeedStream stream', () => {
+      assert.instanceOf(stream, AbstractFeedStream);
+    });
+
+    it('saves the url passed to the constructor', () => {
+      assert.equal(stream._url, url);
+    });
+
+    it('initialises the "_feedFetched" flag with "false"', () => {
+      assert.equal(stream._feedFetched, false);
+    });
   });
 
-  describe('streamFeed', () => {
-    const url = 'https://fake.url.com';
+
+  describe('_read', () => {
     let sandbox;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      sandbox.spy(stream, 'streamFeed');
-      sandbox.spy(stream, 'write');
+      sandbox.spy(stream, '_read');
       sandbox.stub(fbgraph, 'get');
     });
 
@@ -31,25 +41,22 @@ describe('facebook_feed_stream', () => {
     });
 
     describe('when the API returns single page', () => {
-      it('writes results to the stream', (done) => {
-        const apiResponse = { data: [{ a: 1 }] };
+      it('pushes to the buffer this page', (done) => {
+        const firstApiResponse = { data: [{ a: 1 }] };
+        const dataHandler = sandbox.stub();
 
-        fbgraph.get.yieldsAsync(null, apiResponse);
+        fbgraph.get.yieldsAsync(null, firstApiResponse);
 
-        stream.on('finish', () => {
-          assert.ok(stream.streamFeed.calledOnce);
-          assert.ok(stream.write.calledOnce);
-          assert.ok(stream.write.calledWith(apiResponse.data));
+        stream.on('data', dataHandler);
+        stream.on('end', () => {
+          assert.ok(dataHandler.calledWith(firstApiResponse.data));
           done();
         });
-
-        stream.streamFeed(url);
       });
     });
 
     describe('when the API returns a multi-page response', () => {
-      it('sends multiple requests to the API and writes every'
-            + ' single response to the stream individually', (done) => {
+      it('pushes to the buffer each page single individually', (done) => {
         const secondApiResponse = { data: [{ b: 2 }] };
         const firstApiResponse = {
           data: [{ a: 1 }],
@@ -57,23 +64,18 @@ describe('facebook_feed_stream', () => {
             next: 'https://fake.url.com/?page=2',
           },
         };
+        const dataHandler = sandbox.stub();
 
         fbgraph.get.onCall(0).yieldsAsync(null, firstApiResponse);
         fbgraph.get.onCall(1).yieldsAsync(null, secondApiResponse);
 
-        stream.on('finish', () => {
-          assert.ok(stream.streamFeed.calledTwice);
-          assert.equal(stream.streamFeed.firstCall.args[0], url);
-          assert.equal(stream.streamFeed.secondCall.args[0], firstApiResponse.paging.next);
-
-          assert.ok(stream.write.calledTwice);
-          assert.equal(stream.write.firstCall.args[0], firstApiResponse.data);
-          assert.equal(stream.write.secondCall.args[0], secondApiResponse.data);
-
+        stream.on('data', dataHandler);
+        stream.on('end', () => {
+          assert.ok(dataHandler.calledTwice);
+          assert.deepEqual(dataHandler.firstCall.args, [firstApiResponse.data]);
+          assert.deepEqual(dataHandler.secondCall.args, [secondApiResponse.data]);
           done();
         });
-
-        stream.streamFeed(url);
       });
     });
 
@@ -86,7 +88,7 @@ describe('facebook_feed_stream', () => {
           assert.deepEqual(actualError, expectedError);
           done();
         });
-        stream.streamFeed();
+        stream._read();
       });
     });
   });

@@ -5,92 +5,128 @@ import TwitterFeedStream from '../../../../server/lib/twitter/twitter_feed_strea
 
 describe('twitter_feed_stream', () => {
   let stream;
+  const fakeUrlPath = 'victims/clemenza_timeline';
+  const fakeRequestParams = { count: 10 };
+  const fakeNumberOfPagesToFetch = 2;
 
   beforeEach(() => {
-    stream = new TwitterFeedStream();
+    stream = new TwitterFeedStream(fakeUrlPath, fakeRequestParams, fakeNumberOfPagesToFetch);
   });
 
   it('extends AbstractFeedStream stream', () => {
     assert.instanceOf(stream, AbstractFeedStream);
   });
 
-  describe('streamFeed', () => {
-    const url = 'https://fake.url.com';
+  describe('constructor', () => {
+    it('initialises url path', () => {
+      assert.equal(stream._urlPath, fakeUrlPath);
+    });
+
+    it('initialises number of pages that should be fetched by the stream', () => {
+      assert.equal(stream._numberOfPagesToFetch, fakeNumberOfPagesToFetch);
+    });
+
+    it('initialises parameters of twitter API calls', () => {
+      assert.deepEqual(stream._requestParameters, fakeRequestParams);
+    });
+  });
+
+  describe('read', () => {
     let sandbox;
+    let dataHandler;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      sandbox.spy(stream, 'streamFeed');
-      sandbox.spy(stream, 'write');
-      sandbox.stub(stream.twitterApi, 'get');
+      sandbox.stub(stream._twitterApi, 'get');
+      dataHandler = sandbox.stub();
     });
 
     afterEach(() => {
       sandbox.restore();
     });
 
-    describe('when the API returns single page', () => {
-      it('writes results to the stream', (done) => {
-        const apiResponse = [[{ id: 1 }]];
-        const requestsParams = { param: 'value' };
+    describe('when the stream is supposed to fetch only one page', () => {
+      const apiResponse = [[{ id: 1 }]];
 
-        stream.twitterApi.get.yieldsAsync(null, [apiResponse]);
+      beforeEach(() => {
+        stream._numberOfPagesToFetch = 1;
+        stream._twitterApi.get.yieldsAsync(null, [apiResponse]);
+      });
 
-        stream.on('finish', () => {
-          assert.ok(stream.streamFeed.calledOnce);
-          assert.ok(stream.streamFeed.calledWith(url, requestsParams));
-          assert.ok(stream.write.calledOnce);
-          assert.ok(stream.write.calledWith(apiResponse));
+      it('calls twitter API once', (done) => {
+        stream.on('data', dataHandler);
+        stream.on('end', () => {
+          assert.ok(stream._twitterApi.get.calledWith(fakeUrlPath, fakeRequestParams));
           done();
         });
+      });
 
-        stream.streamFeed(url, requestsParams);
+      it('pushes the response to the buffer and ends the ' +
+              'stream once the response is fetched', (done) => {
+        stream.on('data', dataHandler);
+        stream.on('end', () => {
+          assert.ok(dataHandler.calledWith(apiResponse));
+          done();
+        });
       });
     });
 
-    describe('when the API returns a multi-page response', () => {
-      it('sends multiple requests to the API and writes every'
-            + ' single response to the stream individually', (done) => {
-        const requestsParams = {
-          param: 'value',
-        };
-        const expectedSecondRequestParams = {
-          param: 'value',
-          max_id: 1,
-        };
-        const secondApiResponse = [[{ id: 1 }]];
-        const firstApiResponse = [[{ id: 1 }, { id: 2 }]];
+    describe('when the stream is supposed to fetch two pages', () => {
+      const secondApiResponse = [[{ id: 1 }]];
+      const firstApiResponse = [[{ id: 1 }, { id: 2 }]];
+      const expectedSecondRequestParams = {
+        count: 10,
+        max_id: 1,
+      };
 
-        stream.twitterApi.get.onCall(0).yieldsAsync(null, firstApiResponse);
-        stream.twitterApi.get.onCall(1).yieldsAsync(null, secondApiResponse);
+      beforeEach(() => {
+        stream._twitterApi.get.onCall(0).yieldsAsync(null, firstApiResponse);
+        stream._twitterApi.get.onCall(1).yieldsAsync(null, secondApiResponse);
+      });
 
-        stream.on('finish', () => {
-          assert.ok(stream.streamFeed.calledTwice);
-          assert.deepEqual(stream.streamFeed.secondCall.args, [
-            url, expectedSecondRequestParams, 1,
-          ]);
-
-          assert.ok(stream.write.calledTwice);
-          assert.deepEqual(stream.write.firstCall.args, firstApiResponse);
-          assert.deepEqual(stream.write.secondCall.args, secondApiResponse);
-
+      it('calls twitter API twice', (done) => {
+        stream.on('data', dataHandler);
+        stream.on('end', () => {
+          assert.ok(stream._twitterApi.get.calledTwice);
           done();
         });
+      });
 
-        stream.streamFeed(url, requestsParams, 2);
+      describe('when it calls twitter API for the second time', () => {
+        it('extends default request parameters with max_id param ' +
+              'equal the lowest id coming in the previous response', (done) => {
+          stream.on('data', dataHandler);
+          stream.on('end', () => {
+            const actualArgs = stream._twitterApi.get.secondCall.args;
+            assert.equal(actualArgs[0], fakeUrlPath);
+            assert.deepEqual(actualArgs[1], expectedSecondRequestParams);
+            done();
+          });
+        });
+      });
+
+      it('pushes both reponses to the buffer and ends streaming', (done) => {
+        stream.on('data', dataHandler);
+        stream.on('end', () => {
+          assert.ok(dataHandler.calledTwice);
+          assert.deepEqual(dataHandler.firstCall.args, firstApiResponse);
+          assert.deepEqual(dataHandler.secondCall.args, secondApiResponse);
+          done();
+        });
       });
     });
 
     describe('when the API returns an error', () => {
       it('emits the error', (done) => {
         const expectedError = new Error('There\'s no feed! I\'m hungry!');
-        stream.twitterApi.get.yieldsAsync(expectedError);
+        stream._twitterApi.get.yieldsAsync(expectedError);
 
         stream.on('error', (actualError) => {
           assert.deepEqual(actualError, expectedError);
           done();
         });
-        stream.streamFeed();
+
+        stream._read();
       });
     });
   });
