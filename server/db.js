@@ -26,7 +26,13 @@ function _initModels() {
 * is closed once the process is killed.
 */
 function connect() {
-  const uri = `mongodb://${config.MONGODB_USER}:${config.MONGODB_PASSWORD}@${config.MONGODB_HOST}:${config.MONGODB_PORT}/${config.MONGODB_DATABASE}`;
+  const user = config.get('MONGODB_USER');
+  const pwd = config.get('MONGODB_PASSWORD');
+  const host = config.get('MONGODB_HOST');
+  const port = config.get('MONGODB_PORT');
+  const dbName = config.get('MONGODB_DATABASE');
+
+  const uri = `mongodb://${user}:${pwd}@${host}:${port}/${dbName}`;
   connection = mongoose.createConnection(uri);
 
   connection.on('connected', () => {

@@ -12,7 +12,7 @@ import ScraperRunner from './lib/scraper_runner.js';
 **/
 export default function scheduleJobs() {
   const job = new CronJob({
-    cronTime: `*/${config.SCHEDULER_POLLING_INTERVAL} * * * * *`,
+    cronTime: `*/${config.get('SCHEDULER_POLLING_INTERVAL')} * * * * *`,
     onTick: () => {
       logger.logInfo('Crone job triggered...');
       ScraperRunner.run();
