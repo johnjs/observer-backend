@@ -2,7 +2,7 @@
   "name": "observer-backend",
   "version": "0.0.1",
   "description": "",
-  "main": "scheduler.js",
+  "main": "/build/start.js",
   "dependencies": {
     "amqplib": "^0.4.1",
     "babel": "^6.5.2",
@@ -36,7 +36,7 @@
     "sinon": "^1.17.3"
   },
   "scripts": {
-    "start": "node ./build/scheduler.js",
+    "start": "node ./build/start.js",
     "build": "babel ./lib -d ./build --source-maps --copy-files",
     "watch": "babel ./lib -d ./build --source-maps --copy-files --watch",
     "clean": "rm -rf ./build",
