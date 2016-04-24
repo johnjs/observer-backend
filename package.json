@@ -2,7 +2,7 @@
   "name": "observer-backend",
   "version": "0.0.1",
   "description": "",
-  "main": "scheduler.js",
+  "main": "/build/start.js",
   "dependencies": {
     "amqplib": "^0.4.1",
     "babel": "^6.5.2",
@@ -36,15 +36,15 @@
     "sinon": "^1.17.3"
   },
   "scripts": {
-    "start": "node ./build/scheduler.js",
-    "build": "babel ./server -d ./build --source-maps --copy-files",
-    "watch": "babel ./server -d ./build --source-maps --copy-files --watch",
+    "start": "node ./build/start.js",
+    "build": "babel ./lib -d ./build --source-maps --copy-files",
+    "watch": "babel ./lib -d ./build --source-maps --copy-files --watch",
     "clean": "rm -rf ./build",
     "test": "make test",
     "coverage": "npm run analyze-coverage && npm run check-coverage --silent",
     "analyze-coverage": "NODE_ENV=test ./node_modules/.bin/babel-node node_modules/.bin/istanbul cover node_modules/.bin/_mocha  'test/**/*.js'",
     "check-coverage": "node node_modules/.bin/istanbul check-coverage --branches 100 --lines 100 --function 100",
-    "lint": "eslint ./server ./test"
+    "lint": "eslint ./lib ./test"
   },
   "repository": {
     "type": "git",
