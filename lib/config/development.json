@@ -1,7 +1,3 @@
 {
-    "SCHEDULER_POLLING_INTERVAL": 120,
-    "RABBIT_USER": "guest",
-    "RABBIT_PASSWORD": "guest",
-    "RABBIT_PORT": 5672,
-    "RABBIT_HOST": "localhost"
+  "MONGODB_DATABASE": "observer_backend_dev"
 }
