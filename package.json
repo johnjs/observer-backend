@@ -1,7 +1,7 @@
 {
   "name": "observer-backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "Project responsible for fetching data from social media services.",
   "main": "/build/start.js",
   "dependencies": {
     "amqplib": "^0.4.1",
@@ -36,6 +36,7 @@
     "sinon": "^1.17.3"
   },
   "scripts": {
+    "prestart": "npm run clean && npm run build",
     "start": "node ./build/start.js",
     "build": "babel ./lib -d ./build --source-maps --copy-files",
     "watch": "babel ./lib -d ./build --source-maps --copy-files --watch",

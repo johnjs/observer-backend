@@ -1,6 +1,21 @@
 {
+  "FEED_DESTINATION": "QUEUE",
+  "SCHEDULER_POLLING_INTERVAL": 20,
+
+  "MONGODB_DATA_DIR": "/var/lib/mongodb",
   "MONGODB_DATABASE": "observer_backend",
-  "MONGODB_PORT": "27017",
+  "MONGODB_PORT": 27017,
   "MONGODB_HOST": "localhost",
-  "MONGODB_USER": "observer_backend"
+  "MONGODB_USER": "observer_backend",
+  "MONGODB_PASSWORD": "",
+
+  "RABBIT_USER": "",
+  "RABBIT_PASSWORD": "",
+  "RABBIT_PORT": 5672,
+  "RABBIT_HOST": "localhost",
+
+  "TWITTER_CONSUMER_KEY": "",
+  "TWITTER_CONSUMER_SECRET": "",
+  "TWITTER_ACCESS_TOKEN": "",
+  "TWITTER_ACCESS_TOKEN_SECRET": ""
 }
