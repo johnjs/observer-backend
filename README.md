@@ -28,11 +28,12 @@ Once they are available on your environment run following commands:
 
 ```sh
 npm install #installs projects dependencies
-node scripts/db.sh setup dev --dbuser <user> --password <pwd> #creates DB users and collections
+npm run migratedb #prepares db schema
 nf start #uses foreman to start the app and run required services
 ```
 
 Before you run the last command please install [node-foreman](https://github.com/strongloop/node-foreman) module globally.
+The second step requires db user's credentials to be defined in project's configuration. See [Configuration](https://github.com/johnjs/observer-backend#configuration) section.
 
 Configuration
 ===============

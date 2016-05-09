@@ -8,6 +8,7 @@
   "MONGODB_HOST": "localhost",
   "MONGODB_USER": "observer_backend",
   "MONGODB_PASSWORD": "",
+  "MONGODB_MIGRATIONS_COLLECTION": "migrationversion",
 
   "RABBIT_USER": "",
   "RABBIT_PASSWORD": "",
