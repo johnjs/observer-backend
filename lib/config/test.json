@@ -1,5 +1,7 @@
 {
     "MONGODB_DATABASE": "observer_backend_test",
+    "MONGODB_USER": "",
+    "MONGODB_PASSWORD": "",
     "TWITTER_CONSUMER_KEY": "fakekey",
     "TWITTER_CONSUMER_SECRET": "fakesecret",
     "TWITTER_ACCESS_TOKEN": "faketoken",
