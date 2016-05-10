@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import mongoose from 'mongoose';
+import diehard from 'diehard';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
 import logger from '../../../../lib/utils/logger';
@@ -20,6 +21,7 @@ describe('db', () => {
 
     sandbox.stub(logger, 'logError');
     sandbox.stub(logger, 'logInfo');
+    sandbox.stub(diehard, 'register');
   });
 
   afterEach(() => {
@@ -69,16 +71,13 @@ describe('db', () => {
       });
     });
 
-    it('adds a listener to process SIGINT event which closes the db connection', (done) => {
-      process.on = sandbox.stub().yieldsAsync();
-
-      db.connect();
-
-      process.nextTick(() => {
+    it('registers a diehard listener for `process killed/interrupted` events '
+          + 'which closes the db connection', (done) => {
+      diehard.register.callsArgWithAsync(0, () => {
         assert.ok(connectionStub.close.calledOnce);
-        assert.ok(logger.logInfo.calledOnce);
         done();
       });
+      db.connect();
     });
   });
 

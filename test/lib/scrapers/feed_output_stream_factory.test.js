@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import * as sinon from 'sinon';
+import fs from 'fs';
 import Q from 'q';
 import config from '../../../lib/config/config.js';
 import FeedOutputStreamFactory from '../../../lib/scrapers/feed_output_stream_factory';
@@ -43,6 +44,7 @@ describe('feed_output_stream_factory', () => {
     describe('when the FEED_DESTINATION config variable equals FILE', () => {
       it('returns a promise resolving to instance of FileFeedOutputStream', (done) => {
         sandbox.stub(config, 'get').withArgs('FEED_DESTINATION').returns('FILE');
+        sandbox.stub(fs, 'createWriteStream');
         FeedOutputStreamFactory.getStream(fakeAccount, fakeSource).then((stream) => {
           assert.instanceOf(stream, FileFeedOutputStream);
           done();

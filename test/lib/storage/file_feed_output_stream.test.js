@@ -24,6 +24,7 @@ describe('file_feed_output_stream', () => {
   describe('constructor', () => {
     beforeEach(() => {
       sandbox.useFakeTimers(new Date('2016-04-20T13:58:51.084Z').getTime());
+      sandbox.stub(fs, 'createWriteStream').returns({});
       stream = new FileFeedOutputStream(fakeAccount, fakeSource);
     });
 
@@ -38,7 +39,7 @@ describe('file_feed_output_stream', () => {
     it('initialises the file output stream', () => {
       const expectedPath = './feed/corleone_family/tom_hagen_2016-04-20T13:58:51.084Z.json';
       assert.isDefined(stream.fileStream);
-      assert.equal(stream.fileStream.path, expectedPath);
+      assert.ok(fs.createWriteStream.calledWith(expectedPath));
     });
   });
 
