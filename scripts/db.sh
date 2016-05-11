@@ -56,6 +56,9 @@ function closeDbConnection(db) {
 
 function createCollection(db) {
   return Q.denodeify(db.createCollection.bind(db))('scraping_jobs')
+    .then(function() {
+      return Q.denodeify(db.createCollection.bind(db))('post');
+    })
     .then(function() { return db });
 }
 

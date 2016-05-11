@@ -10,15 +10,18 @@ var logMsg = {
   facebook: logFacebookMsg
 };
 
-amqp.connect('amqp://localhost', function(err, conn) {
+amqp.connect('amqp://localhost?heartbeat=10', function(err, conn) {
   conn.createChannel(function(err, ch) {
     ch.assertExchange(EXCHANGE_NAME, 'direct', {durable: true});
 
     ch.assertQueue(QUEUE_NAME, {durable: true}, function(err, q) {
       ch.bindQueue(QUEUE_NAME, EXCHANGE_NAME, '');
+      ch.prefetch(1);
       ch.consume(QUEUE_NAME, function(msg) {
         var entry = JSON.parse(msg.content.toString('utf-8'));
-        logMsg[entry.source](entry);
+        entry.data.forEach((mention) => {
+          console.log(mention.created_at || mention.created_time);
+        });
         ch.ack(msg);
       }, {noAck: false});
     });
