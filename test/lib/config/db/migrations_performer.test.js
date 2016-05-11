@@ -39,6 +39,16 @@ describe('migrations_performer', () => {
         });
       });
     });
+
+    describe('000002-posts-collection.js', () => {
+      beforeEach(() => migrate.applyMigrationsUpTo('000002-posts-collection.js'));
+      it('creates posts collection', (done) => {
+        connection.db.listCollections().toArray((err, collsInfo) => {
+          assert.include(pluck(collsInfo, 'name'), 'posts');
+          done();
+        });
+      });
+    });
   });
 
   describe('methods', () => {
@@ -46,7 +56,10 @@ describe('migrations_performer', () => {
 
     describe('getAllMigrationsScripts', () => {
       it('returns ids of all the migration scripts defined in the project', () => {
-        const expectedIds = ['000001-scraping_jobs-collection.js'];
+        const expectedIds = [
+          '000001-scraping_jobs-collection.js',
+          '000002-posts-collection.js',
+        ];
         return migrate.getAllMigrationsScripts().then((actualIds) => {
           assert.deepEqual(actualIds, expectedIds);
         });
