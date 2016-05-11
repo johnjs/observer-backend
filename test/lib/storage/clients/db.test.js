@@ -89,6 +89,8 @@ describe('db', () => {
                 .returns(fakeScrapingJobModel);
 
       db.connect();
+      db.registerModel('scraping_job', 'scraping_jobs', scrapingJobSchema);
+
       assert.equal(db.getModelClass('scraping_job'), fakeScrapingJobModel);
     });
 

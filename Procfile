@@ -1,2 +1,2 @@
-web: npm start
-mongo: mongod --dbpath=${MONGODB_DATA_DIR}
+scheduler: node ./build/start.js
+aggregator: node ./build/startAggregator.js
