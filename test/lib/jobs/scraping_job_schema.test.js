@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import mongoose from 'mongoose';
-import ScrapingJobSchema from '../../../lib/jobs/scraping_job_schema';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const mongoose = require('mongoose');
+const ScrapingJobSchema = require('../../../lib/jobs/scraping_job_schema');
 
 describe('scraping_job_schema', () => {
   let sandbox;

@@ -1,11 +1,11 @@
-import EventEmitter from 'events';
-import mongoose from 'mongoose';
-import diehard from 'diehard';
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import logger from '../../../../lib/utils/logger';
-import scrapingJobSchema from '../../../../lib/jobs/scraping_job_schema';
-import * as db from '../../../../lib/storage/clients/db';
+const EventEmitter = require('events');
+const mongoose = require('mongoose');
+const diehard = require('diehard');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const logger = require('../../../../lib/utils/logger');
+const scrapingJobSchema = require('../../../../lib/jobs/scraping_job_schema');
+const db = require('../../../../lib/storage/clients/db');
 
 describe('db', () => {
   let sandbox;

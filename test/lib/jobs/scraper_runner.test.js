@@ -1,12 +1,11 @@
-import EventEmitter from 'events';
-import { default as childProcess } from 'child_process';
-import Q from 'q';
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import * as db from '../../../lib//storage/clients/db';
-import ScraperRunner from '../../../lib/jobs/scraper_runner';
-import logger from '../../../lib/utils/logger';
-
+const EventEmitter = require('events');
+const childProcess = require('child_process');
+const Q = require('q');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const db = require('../../../lib//storage/clients/db');
+const ScraperRunner = require('../../../lib/jobs/scraper_runner');
+const logger = require('../../../lib/utils/logger');
 
 describe('scraper_runner', () => {
   let sandbox;

@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import fs from 'fs';
-import Q from 'q';
-import config from '../../../lib/config/config.js';
-import FeedOutputStreamFactory from '../../../lib/scrapers/feed_output_stream_factory';
-import FileFeedOutputStream from '../../../lib/storage/file_feed_output_stream';
-import QueueFeedOutputStream from '../../../lib/storage/queue_feed_output_stream';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const fs = require('fs');
+const Q = require('q');
+const config = require('../../../lib/config/config.js');
+const FeedOutputStreamFactory = require('../../../lib/scrapers/feed_output_stream_factory');
+const FileFeedOutputStream = require('../../../lib/storage/file_feed_output_stream');
+const QueueFeedOutputStream = require('../../../lib/storage/queue_feed_output_stream');
 
 describe('feed_output_stream_factory', () => {
   let sandbox;

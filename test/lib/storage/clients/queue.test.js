@@ -1,10 +1,10 @@
-import diehard from 'diehard';
-import Q from 'q';
-import ampq from 'amqplib';
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import logger from '../../../../lib/utils/logger';
-import * as queue from '../../../../lib/storage/clients/queue';
+const diehard = require('diehard');
+const Q = require('q');
+const ampq = require('amqplib');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const logger = require('../../../../lib/utils/logger');
+const queue = require('../../../../lib/storage/clients/queue');
 
 describe('queue', () => {
   let sandbox;
