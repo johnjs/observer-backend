@@ -1,7 +1,7 @@
-import proxyquire from 'proxyquire';
-import { assert } from 'chai';
+const proxyquire = require('proxyquire');
+const { assert } = require('chai');
 
-describe('config', () => {
+describe('config.test.js', () => {
   let config;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('config', () => {
     config = proxyquire('../../../lib/config/config', {
       './global.json': globalConfig,
       './test.json': testConfig,
-    }).default;
+    });
   });
 
   it('extends global configuration with environment ' +

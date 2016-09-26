@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import proxyquire from 'proxyquire';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire');
 
 describe('start_app', () => {
   let sandbox;
@@ -17,9 +17,7 @@ describe('start_app', () => {
     };
 
     proxyquire('../../lib/start', {
-      './jobs/scheduler': {
-        default: schedulerMock,
-      },
+      './jobs/scheduler': schedulerMock,
       './storage/clients/db': dbMock,
     });
   });

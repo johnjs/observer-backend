@@ -1,10 +1,9 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import proxyquire from 'proxyquire';
-import AbstractScraper from '../../../../lib/scrapers/abstract_scraper.js';
-import TwitterFeedStream from '../../../../lib/scrapers/twitter/twitter_feed_stream';
-import TwitterScraper from '../../../../lib/scrapers/twitter/twitter_scraper.js';
-
+const { assert } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire');
+const AbstractScraper = require('../../../../lib/scrapers/abstract_scraper.js');
+const TwitterFeedStream = require('../../../../lib/scrapers/twitter/twitter_feed_stream');
+const TwitterScraper = require('../../../../lib/scrapers/twitter/twitter_scraper.js');
 
 describe('twitter_scraper', () => {
   let sandbox;

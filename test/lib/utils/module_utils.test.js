@@ -1,5 +1,5 @@
-import { assert } from 'chai';
-import * as moduleUtils from '../../../lib/utils/module_utils';
+const { assert } = require('chai');
+const moduleUtils = require('../../../lib/utils/module_utils');
 
 describe('module_utils', () => {
   describe('isExecutedAsScript', () => {

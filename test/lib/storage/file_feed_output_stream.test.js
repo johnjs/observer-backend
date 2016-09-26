@@ -1,10 +1,10 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import fs from 'fs';
-import multipipe from 'multipipe';
-import es from 'event-stream';
-import Q from 'q';
-import FileFeedOutputStream from '../../../lib/storage/file_feed_output_stream';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const fs = require('fs');
+const multipipe = require('multipipe');
+const es = require('event-stream');
+const Q = require('q');
+const FileFeedOutputStream = require('../../../lib/storage/file_feed_output_stream');
 
 describe('file_feed_output_stream', () => {
   let sandbox;

@@ -1,10 +1,10 @@
-import { Migration } from 'mongration';
-import Q from 'q';
-import * as sinon from 'sinon';
-import { assert } from 'chai';
-import { pluck } from 'underscore';
-import * as db from '../../../../lib/storage/clients/db';
-import migrate from '../../../../lib/config/db/migrations_performer';
+const { Migration } = require('mongration');
+const Q = require('q');
+const sinon = require('sinon');
+const { assert } = require('chai');
+const { pluck } = require('underscore');
+const db = require('../../../../lib/storage/clients/db');
+const migrate = require('../../../../lib/config/db/migrations_performer');
 
 describe('migrations_performer', () => {
   let connection;
@@ -81,7 +81,7 @@ describe('migrations_performer', () => {
     });
 
     describe('applyMigrationsUpTo', () => {
-      it('applies all the migrations starting from the first one'
+      it('applies all the migrations starting = require(the first one'
       + ' and ending with the one passed as the argument', () => {
         sandbox.stub(migrate, 'getAllMigrationsScripts').returns(new Q(migrationsIds));
         sandbox.stub(migrate, 'applyMigrations').returns(new Q({}));

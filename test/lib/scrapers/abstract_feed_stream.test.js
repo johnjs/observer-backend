@@ -1,6 +1,6 @@
-import { Readable } from 'stream';
-import { assert } from 'chai';
-import AbstractFeedStream from '../../../lib/scrapers/abstract_feed_stream';
+const { Readable } = require('stream');
+const { assert } = require('chai');
+const AbstractFeedStream = require('../../../lib/scrapers/abstract_feed_stream');
 
 describe('abstract_feed_stream', () => {
   let stream;

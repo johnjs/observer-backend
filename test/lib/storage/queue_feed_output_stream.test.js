@@ -1,11 +1,11 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import { Writable } from 'stream';
-import multipipe from 'multipipe';
-import es from 'event-stream';
-import Q from 'q';
-import * as queue from '../../../lib/storage/clients/queue';
-import QueueFeedOutputStream from '../../../lib/storage/queue_feed_output_stream';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const { Writable } = require('stream');
+const multipipe = require('multipipe');
+const es = require('event-stream');
+const Q = require('q');
+const queue = require('../../../lib/storage/clients/queue');
+const QueueFeedOutputStream = require('../../../lib/storage/queue_feed_output_stream');
 
 describe('queue_feed_output_stream', () => {
   const fakeAccount = 'tom_hagen';

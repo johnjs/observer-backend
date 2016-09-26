@@ -1,8 +1,8 @@
-import Q from 'q';
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import proxyquire from 'proxyquire';
-import logger from '../../../../lib/utils/logger';
+const Q = require('q');
+const { assert } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire');
+const logger = require('../../../../lib/utils/logger');
 
 describe('runAllMigrations', () => {
   let sandbox;
@@ -17,9 +17,7 @@ describe('runAllMigrations', () => {
 
     proxyquire('../../../../lib/config/db/runAllMigrations', {
       './migrations_performer': {
-        default: {
-          applyAllMigrations: applyAllMigrationsStub,
-        },
+        applyAllMigrations: applyAllMigrationsStub,
       },
     });
   });

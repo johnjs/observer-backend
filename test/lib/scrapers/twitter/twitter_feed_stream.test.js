@@ -1,7 +1,7 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import AbstractFeedStream from '../../../../lib/scrapers/abstract_feed_stream';
-import TwitterFeedStream from '../../../../lib/scrapers/twitter/twitter_feed_stream';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const AbstractFeedStream = require('../../../../lib/scrapers/abstract_feed_stream');
+const TwitterFeedStream = require('../../../../lib/scrapers/twitter/twitter_feed_stream');
 
 describe('twitter_feed_stream', () => {
   let stream;
