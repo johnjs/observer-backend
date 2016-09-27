@@ -1,5 +1,5 @@
-import { assert } from 'chai';
-import NotImplementedError from '../../../lib/errors/not_implemented_error';
+const { assert } = require('chai');
+const NotImplementedError = require('../../../lib/errors/not_implemented_error');
 
 describe('not_implemented_error', () => {
   const notImplementedMethodName = 'hireLucaBrasi';

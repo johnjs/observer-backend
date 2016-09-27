@@ -1,9 +1,9 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import proxyquire from 'proxyquire';
-import AbstractScraper from '../../../../lib/scrapers/abstract_scraper.js';
-import FacebookFeedStream from '../../../../lib/scrapers/facebook/facebook_feed_stream';
-import FacebookScraper from '../../../../lib/scrapers/facebook/facebook_scraper.js';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire');
+const AbstractScraper = require('../../../../lib/scrapers/abstract_scraper.js');
+const FacebookFeedStream = require('../../../../lib/scrapers/facebook/facebook_feed_stream');
+const FacebookScraper = require('../../../../lib/scrapers/facebook/facebook_scraper.js');
 
 describe('facebook_scraper', () => {
   let sandbox;
@@ -47,7 +47,7 @@ describe('facebook_scraper', () => {
       sandbox.useFakeTimers(new Date(currentTime).valueOf());
     });
 
-    it('returns proper url which is supposed to download the feed from last 24 hours', () => {
+    it('returns proper url which is supposed to download the feed require(last 24 hours', () => {
       const expectedUrl = [
         `${fakeAccount}/feed?`,
         `access_token=${fakeToken}`,

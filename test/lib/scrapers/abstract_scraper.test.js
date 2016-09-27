@@ -1,12 +1,12 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import EventEmitter from 'events';
-import stream from 'stream';
-import Q from 'q';
-import NotImplementedError from '../../../lib/errors/not_implemented_error';
-import AbstractScraper from '../../../lib/scrapers/abstract_scraper';
-import FeedOutputStreamFactory from '../../../lib/scrapers/feed_output_stream_factory';
-import logger from '../../../lib/utils/logger';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const EventEmitter = require('events');
+const stream = require('stream');
+const Q = require('q');
+const NotImplementedError = require('../../../lib/errors/not_implemented_error');
+const AbstractScraper = require('../../../lib/scrapers/abstract_scraper');
+const FeedOutputStreamFactory = require('../../../lib/scrapers/feed_output_stream_factory');
+const logger = require('../../../lib/utils/logger');
 
 describe('abstract_scraper', () => {
   let sandbox;

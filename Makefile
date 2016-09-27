@@ -1,4 +1,4 @@
-MOCHA=./node_modules/.bin/mocha --compilers js:babel-register --reporter spec 'test/**/*.test.js'
+MOCHA=./node_modules/.bin/mocha --reporter spec 'test/**/*.test.js'
 
 test:
 	@NODE_ENV=test $(MOCHA)

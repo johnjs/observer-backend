@@ -1,8 +1,8 @@
-import { assert } from 'chai';
-import * as sinon from 'sinon';
-import AbstractFeedStream from '../../../../lib/scrapers/abstract_feed_stream';
-import FacebookFeedStream from '../../../../lib/scrapers/facebook/facebook_feed_stream';
-import fbgraph from '../../../../lib/scrapers/facebook/fbgraph.js';
+const { assert } = require('chai');
+const sinon = require('sinon');
+const AbstractFeedStream = require('../../../../lib/scrapers/abstract_feed_stream');
+const FacebookFeedStream = require('../../../../lib/scrapers/facebook/facebook_feed_stream');
+const fbgraph = require('../../../../lib/scrapers/facebook/fbgraph.js');
 
 describe('facebook_feed_stream', () => {
   const url = 'https://fake.url.com';
